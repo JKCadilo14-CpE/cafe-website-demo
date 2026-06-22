@@ -1,0 +1,27 @@
+
+node_modules/
+uploads/
+sess_*
+.env
+.env.*
+config.local.php
+*.log
+*.tmp
+*.temp
+*.bak
+*.old
+*.copy
+*.orig
+*.sql
+*.zip
+.agents/
+.qodo/
+.DS_Store
+Thumbs.db
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+playwright/.auth/
