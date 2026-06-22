@@ -1,9 +1,8 @@
 name: Playwright Tests
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+  # Local Playwright tests require XAMPP/PHP/MySQL setup.
+  # Full CI setup will be added later.
+  workflow_dispatch:
 jobs:
   test:
     timeout-minutes: 60
