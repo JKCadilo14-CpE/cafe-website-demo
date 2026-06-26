@@ -88,7 +88,7 @@ if (isset($_GET['reminder'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Menu | JKC Cafe</title>
   <meta name="description" content="Browse the JKC Cafe menu with hot coffee, iced coffee, featured drinks, pastries, and simple cafe food.">
-  <link rel="icon" type="image/png" href="./images/logo.svg">
+  <link rel="icon" type="image/svg+xml" href="./images/logo.svg">
   <link rel="stylesheet" href="user-css/style.css">
   <link rel="stylesheet" href="user-css/menu.css">
 </head>

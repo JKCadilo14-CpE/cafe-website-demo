@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rewards | JKC Cafe</title>
   <meta name="description" content="Join JKC Cafe Rewards to earn points on coffee, pastries, and everyday cafe visits.">
-  <link rel="icon" type="image/png" href="./images/logo.svg">
+  <link rel="icon" type="image/svg+xml" href="./images/logo.svg">
   <link rel="stylesheet" href="user-css/style.css">
   <link rel="stylesheet" href="user-css/rewards.css">
 </head>

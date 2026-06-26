@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Demo Password Recovery | JKC Cafe</title>
   <meta name="description" content="Demo-only JKC Cafe password recovery form.">
-  <link rel="icon" type="image/png" href="./images/logo.svg">
+  <link rel="icon" type="image/svg+xml" href="./images/logo.svg">
   <link rel="stylesheet" href="user-css/style.css">
   <link rel="stylesheet" href="user-css/auth.css">
 </head>

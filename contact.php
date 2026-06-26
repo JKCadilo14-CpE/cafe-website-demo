@@ -77,7 +77,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact | JKC Cafe</title>
   <meta name="description" content="Contact JKC Cafe for visits, orders, questions, and simple cafe support.">
-  <link rel="icon" type="image/png" href="./images/logo.svg">
+  <link rel="icon" type="image/svg+xml" href="./images/logo.svg">
   <link rel="stylesheet" href="user-css/style.css">
   <link rel="stylesheet" href="user-css/contact.css">
 </head>

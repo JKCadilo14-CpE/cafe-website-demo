@@ -13,7 +13,17 @@ config.local.php
 *.copy
 *.orig
 *.sql
+!database/schema.sql
 *.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.gz
+*.bz2
+*.xz
 .agents/
 .qodo/
 .DS_Store

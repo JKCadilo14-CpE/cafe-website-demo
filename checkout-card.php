@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Card Payment | JKC Cafe</title>
   <meta name="description" content="Enter card details for the JKC Cafe checkout demo.">
-  <link rel="icon" type="image/png" href="./images/logo.svg">
+  <link rel="icon" type="image/svg+xml" href="./images/logo.svg">
   <link rel="stylesheet" href="user-css/style.css">
   <link rel="stylesheet" href="user-css/cart-checkout.css">
 </head>

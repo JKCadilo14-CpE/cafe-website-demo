@@ -1,14 +1,33 @@
 {
-  "name": "project",
+  "name": "jkc-cafe-portfolio",
   "version": "1.0.0",
-  "description": "",
-  "main": "script.js",
+  "description": "A PHP and MySQL cafe ordering portfolio project with a customer storefront and admin dashboard.",
+  "private": true,
   "scripts": {
     "test": "playwright test"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "php",
+    "mysql",
+    "mariadb",
+    "cafe",
+    "ordering",
+    "portfolio",
+    "playwright"
+  ],
+  "author": "JKCadilo14-CpE",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JKCadilo14-CpE/cafe-website-demo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JKCadilo14-CpE/cafe-website-demo/issues"
+  },
+  "homepage": "https://github.com/JKCadilo14-CpE/cafe-website-demo#readme",
+  "engines": {
+    "node": ">=20"
+  },
   "type": "commonjs",
   "devDependencies": {
     "@playwright/test": "^1.61.0",

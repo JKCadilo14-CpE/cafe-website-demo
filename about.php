@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About JKC Cafe</title>
   <meta name="description" content="Learn about JKC Cafe, a warm neighborhood cafe for fresh coffee, simple pastries, and relaxed everyday moments.">
-  <link rel="icon" type="image/png" href="./images/logo.svg">
+  <link rel="icon" type="image/svg+xml" href="./images/logo.svg">
   <link rel="stylesheet" href="user-css/style.css">
   <link rel="stylesheet" href="user-css/about.css">
 </head>

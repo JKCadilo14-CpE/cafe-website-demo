@@ -84,7 +84,7 @@ $isLoggedIn = app_is_logged_in();
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cart | JKC Cafe</title>
   <meta name="description" content="Review your JKC Cafe cart and choose a checkout payment method.">
-  <link rel="icon" type="image/png" href="./images/logo.svg">
+  <link rel="icon" type="image/svg+xml" href="./images/logo.svg">
   <link rel="stylesheet" href="user-css/style.css">
   <link rel="stylesheet" href="user-css/cart-checkout.css">
 </head>

@@ -136,7 +136,7 @@ $statusCopy = match ($currentStatus) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order Status | JKC Cafe</title>
   <meta name="description" content="Track the live progress of your JKC Cafe order.">
-  <link rel="icon" type="image/png" href="./images/logo.svg">
+  <link rel="icon" type="image/svg+xml" href="./images/logo.svg">
   <link rel="stylesheet" href="user-css/style.css">
   <link rel="stylesheet" href="user-css/cart-checkout.css">
 </head>
