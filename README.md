@@ -6,7 +6,7 @@
 ![Playwright](https://img.shields.io/badge/Tested_with-Playwright-2EAD33?logo=playwright&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Active-success)
-![Responsive](https://img.shields.io/badge/Responsive-Yes-success)
+
 
 JKC Cafe is a full-stack cafe ordering portfolio project...
 JKC Cafe is a full-stack cafe ordering portfolio project built with PHP and MySQL/MariaDB. It includes a customer-facing storefront for browsing products and placing demo orders, plus an admin dashboard for managing menu items, orders, users, and customer messages.
@@ -146,6 +146,59 @@ images/            Public visual assets
 database/schema.sql Sanitized schema and safe product seed data
 tests/             Playwright smoke tests
 ```
+
+## 🗺️ Roadmap
+
+### ✅ Version 1.0.0 — First Public Portfolio Release
+
+- [x] Customer-facing cafe website
+- [x] User authentication and profile management
+- [x] Shopping cart and demo checkout
+- [x] Order tracking
+- [x] Admin dashboard
+- [x] Product management
+- [x] Customer contact management
+- [x] Responsive desktop experience
+- [x] Live demo deployment
+- [x] Playwright smoke tests
+- [x] Portfolio-ready documentation
+- [x] MIT License
+- [x] Sanitized database schema
+
+---
+
+### 🚧 Version 1.0.1 — Responsive UI Improvements
+
+- [ ] Improve mobile responsiveness across all pages
+- [ ] Fix remaining layout and spacing inconsistencies
+- [ ] Improve checkout forms on small screens
+- [ ] Optimize admin pages for tablets
+- [ ] Improve touch targets and mobile usability
+- [ ] Test common screen sizes (320px–1440px)
+
+---
+
+### 🔒 Version 1.1.0 — Security & Stability
+
+- [ ] Add CSRF protection
+- [ ] Configure secure session cookies
+- [ ] Add server-side password validation
+- [ ] Add database constraints (e.g. UNIQUE email, foreign keys)
+- [ ] Remove runtime schema creation and seeding
+- [ ] Improve GitHub Actions CI
+- [ ] Expand Playwright test coverage
+
+---
+
+### 💡 Future Improvements
+
+- [ ] Email notifications
+- [ ] Order analytics dashboard
+- [ ] Advanced product search and filtering
+- [ ] Customer reviews and ratings
+- [ ] Performance optimization
+- [ ] Accessibility improvements (WCAG)
+
 
 ## Author
 
