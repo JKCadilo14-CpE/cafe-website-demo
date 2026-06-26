@@ -147,6 +147,28 @@ database/schema.sql Sanitized schema and safe product seed data
 tests/             Playwright smoke tests
 ```
 
+## 🏗️ Application Architecture
+
+```mermaid
+flowchart TD
+
+Browser[Customer / Admin Browser]
+
+Browser --> Apache[Apache + PHP]
+
+Apache --> Auth[Authentication]
+Apache --> Store[Storefront]
+Apache --> Admin[Admin Dashboard]
+Apache --> Orders[Order Processing]
+
+Auth --> Database[(MySQL Database)]
+Store --> Database
+Admin --> Database
+Orders --> Database
+
+Admin --> Uploads[(Uploads Directory)]
+```
+
 ## 🗺️ Roadmap
 
 ### ✅ Version 1.0.0 — First Public Portfolio Release
