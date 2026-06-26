@@ -6,10 +6,25 @@
 ![Playwright](https://img.shields.io/badge/Tested_with-Playwright-2EAD33?logo=playwright&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Active-success)
+![GitHub release](https://img.shields.io/github/v/release/JKCadilo14-CpE/cafe-website-demo)
 
-
-JKC Cafe is a full-stack cafe ordering portfolio project...
 JKC Cafe is a full-stack cafe ordering portfolio project built with PHP and MySQL/MariaDB. It includes a customer-facing storefront for browsing products and placing demo orders, plus an admin dashboard for managing menu items, orders, users, and customer messages.
+
+> **Portfolio Project:** This application is intended for demonstration and educational purposes. Payment and recovery workflows are simulated.
+
+## 📑 Table of Contents
+
+- [Live Demo](#live-demo)
+- [Screenshot Gallery](#screenshot-gallery)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Local Setup](#local-setup)
+- [Testing](#testing)
+- [Deployment Notes](#deployment-notes)
+- [Repository Structure](#repository-structure)
+- [Application Architecture](#-application-architecture)
+- [Roadmap](#-roadmap)
+- [Author](#author)
 
 ## Live Demo
 
@@ -17,9 +32,29 @@ Visit the public demo: [cafedemotempsite.infinityfree.io](http://cafedemotempsit
 
 > The payment and password-recovery experiences are presentation-only demos. Do not enter real payment details or rely on this site for real transactions.
 
-## Screenshots
+## Screenshot Gallery
 
-![JKC Cafe homepage](docs/screenshots/home.png)
+All screenshots below were captured at a 1440×900 desktop layout using isolated demo data.
+
+### Customer Experience
+
+| Page | Preview |
+| --- | --- |
+| Homepage | ![JKC Cafe homepage](docs/screenshots/home.png) |
+| Menu | ![JKC Cafe menu](docs/screenshots/menu.png) |
+| Cart | ![JKC Cafe cart](docs/screenshots/cart.png) |
+| Demo GCash checkout | ![JKC Cafe demo GCash checkout](docs/screenshots/checkout-gcash.png) |
+| Rewards | ![JKC Cafe rewards](docs/screenshots/rewards.png) |
+| Contact | ![JKC Cafe contact page](docs/screenshots/contact.png) |
+| User profile | ![JKC Cafe demo user profile](docs/screenshots/profile.png) |
+
+### Admin Workspace
+
+| Page | Preview |
+| --- | --- |
+| Dashboard | ![JKC Cafe admin dashboard](docs/screenshots/admin-dashboard.png) |
+| Manage products | ![JKC Cafe manage products](docs/screenshots/admin-products.png) |
+| Manage orders | ![JKC Cafe manage orders](docs/screenshots/admin-orders.png) |
 
 ## Features
 
@@ -152,21 +187,23 @@ tests/             Playwright smoke tests
 ```mermaid
 flowchart TD
 
-Browser[Customer / Admin Browser]
+Customer["Customer Browser"]
+Admin["Admin Browser"]
 
-Browser --> Apache[Apache + PHP]
+Customer --> PHP["Apache + PHP"]
+Admin --> PHP
 
-Apache --> Auth[Authentication]
-Apache --> Store[Storefront]
-Apache --> Admin[Admin Dashboard]
-Apache --> Orders[Order Processing]
+PHP --> Auth["Authentication"]
+PHP --> Store["Storefront"]
+PHP --> Dashboard["Admin Dashboard"]
+PHP --> Orders["Order Processing"]
 
-Auth --> Database[(MySQL Database)]
-Store --> Database
-Admin --> Database
-Orders --> Database
+Auth --> DB[(MySQL Database)]
+Store --> DB
+Dashboard --> DB
+Orders --> DB
 
-Admin --> Uploads[(Uploads Directory)]
+Dashboard --> Uploads[(Uploads Directory)]
 ```
 
 ## 🗺️ Roadmap
@@ -180,7 +217,7 @@ Admin --> Uploads[(Uploads Directory)]
 - [x] Admin dashboard
 - [x] Product management
 - [x] Customer contact management
-- [x] Responsive desktop experience
+- [x] Desktop-responsive interface
 - [x] Live demo deployment
 - [x] Playwright smoke tests
 - [x] Portfolio-ready documentation
