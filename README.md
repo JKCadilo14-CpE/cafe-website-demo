@@ -1,5 +1,14 @@
 # JKC Cafe
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-success?logo=googlechrome&logoColor=white)](http://cafedemotempsite.infinityfree.io/)
+![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?logo=mysql&logoColor=white)
+![Playwright](https://img.shields.io/badge/Tested_with-Playwright-2EAD33?logo=playwright&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Active-success)
+![Responsive](https://img.shields.io/badge/Responsive-Yes-success)
+
+JKC Cafe is a full-stack cafe ordering portfolio project...
 JKC Cafe is a full-stack cafe ordering portfolio project built with PHP and MySQL/MariaDB. It includes a customer-facing storefront for browsing products and placing demo orders, plus an admin dashboard for managing menu items, orders, users, and customer messages.
 
 ## Live Demo
