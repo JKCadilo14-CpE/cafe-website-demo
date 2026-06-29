@@ -2037,9 +2037,10 @@ body:has(.settings-page) {
     box-shadow: 0 22px 54px rgba(83, 58, 36, 0.16);
     backdrop-filter: blur(18px);
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
     transform: translateY(-0.75rem) scale(0.98);
-    transition: opacity 220ms var(--ease-polish), transform 220ms var(--ease-polish);
+    transition: opacity 220ms var(--ease-polish), transform 220ms var(--ease-polish), visibility 0s linear 220ms;
   }
 
 .nav-main-links,
@@ -2052,8 +2053,22 @@ body:has(.settings-page) {
 
 .site-nav.is-open {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
     transform: translateY(0) scale(1);
+    transition: opacity 220ms var(--ease-polish), transform 220ms var(--ease-polish), visibility 0s linear 0s;
+  }
+
+.site-nav:not(.is-open) .nav-main-links,
+  .site-nav:not(.is-open) .nav-actions,
+  .site-nav:not(.is-open) .nav-link,
+  .site-nav:not(.is-open) .cart-link,
+  .site-nav:not(.is-open) .nav-cta,
+  .site-nav:not(.is-open) .account-menu,
+  .site-nav:not(.is-open) .account-avatar-button,
+  .site-nav:not(.is-open) .account-popover,
+  .site-nav:not(.is-open) .account-signout {
+    pointer-events: none;
   }
 
 .site-nav.is-open .nav-link,
