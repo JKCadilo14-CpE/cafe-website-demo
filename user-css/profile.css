@@ -536,13 +536,22 @@ body:has(.user-dashboard-page) {
 }
 
 .dashboard-notification-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding-inline: var(--space-4);
   color: var(--dashboard-sage-dark);
   font-size: 0.85rem;
   font-weight: 900;
   text-decoration: none;
+  background: var(--dashboard-sage-soft);
+  border: 1px solid var(--dashboard-line);
+  border-radius: var(--radius-pill);
 }
 
 .dashboard-notification-link:hover {
+  border-color: var(--dashboard-line-strong);
   text-decoration: underline;
 }
 
