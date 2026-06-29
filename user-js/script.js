@@ -82,6 +82,10 @@
     body.classList.toggle("nav-open", isOpen);
     navToggle.setAttribute("aria-expanded", String(isOpen));
     navToggle.setAttribute("aria-label", isOpen ? "Close navigation" : "Open navigation");
+
+    if (!isOpen) {
+      setAccountMenuOpen(false);
+    }
   }
 
   if (nav && navToggle) {

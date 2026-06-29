@@ -51,8 +51,12 @@ body {
   -webkit-tap-highlight-color: rgba(122, 78, 45, 0.16);
 }
 
-body.nav-open {
+html:has(body.nav-open) {
   overflow: hidden;
+}
+
+body.nav-open {
+  overflow: visible;
 }
 
 a {
@@ -2423,7 +2427,7 @@ body {
 }
 
 /* Responsive audit fixes: shared shell and account/settings surfaces. */
-@media (max-width: 1024px) {
+@media (min-width: 861px) and (max-width: 1024px) {
   .header-inner {
     grid-template-columns: minmax(9rem, 1fr) auto minmax(9rem, 1fr);
     gap: var(--space-3);
@@ -2445,6 +2449,7 @@ body {
 
 @media (max-width: 860px) {
   .site-nav {
+    grid-template-columns: 1fr;
     right: var(--space-3);
     left: var(--space-3);
     max-width: calc(100vw - (var(--space-3) * 2));
@@ -2455,6 +2460,23 @@ body {
   .site-nav *,
   .nav-main-links,
   .nav-actions {
+    min-width: 0;
+  }
+
+  .nav-main-links,
+  .nav-actions {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .account-menu,
+  .account-avatar-button,
+  .account-popover {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .account-popover {
     min-width: 0;
   }
 
