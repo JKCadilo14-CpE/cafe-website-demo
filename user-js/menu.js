@@ -4,7 +4,7 @@
   var menuSearch = document.querySelector("[data-menu-search]");
   var menuSearchForm = document.querySelector("[data-menu-search-form]");
   var menuClear = document.querySelector("[data-menu-clear]");
-  var menuFilters = Array.prototype.slice.call(document.querySelectorAll("[data-category]"));
+  var menuFilters = Array.prototype.slice.call(document.querySelectorAll("[data-menu-filters] [data-category]"));
   var menuProducts = Array.prototype.slice.call(document.querySelectorAll("[data-product]"));
   var menuCount = document.querySelector("[data-menu-count]");
   var menuEmpty = document.querySelector("[data-menu-empty]");

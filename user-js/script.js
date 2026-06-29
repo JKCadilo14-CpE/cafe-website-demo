@@ -514,22 +514,43 @@
     } else {
       body.classList.add("reveal-ready");
 
+      function showRevealItem(entry, observer) {
+        if (!entry.isIntersecting) {
+          return;
+        }
+
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      }
+
+      function needsTallRevealTrigger(item) {
+        return item.classList.contains("menu-products") && window.matchMedia && window.matchMedia("(max-width: 860px)").matches;
+      }
+
       var revealObserver = new IntersectionObserver(function (entries, observer) {
         entries.forEach(function (entry) {
-          if (!entry.isIntersecting) {
-            return;
-          }
-
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
+          showRevealItem(entry, observer);
         });
       }, {
         rootMargin: "0px 0px -12% 0px",
         threshold: 0.12
       });
 
+      var tallRevealObserver = new IntersectionObserver(function (entries, observer) {
+        entries.forEach(function (entry) {
+          showRevealItem(entry, observer);
+        });
+      }, {
+        rootMargin: "0px 0px -12% 0px",
+        threshold: 0.01
+      });
+
       revealItems.forEach(function (item) {
-        revealObserver.observe(item);
+        if (needsTallRevealTrigger(item)) {
+          tallRevealObserver.observe(item);
+        } else {
+          revealObserver.observe(item);
+        }
       });
     }
   }
