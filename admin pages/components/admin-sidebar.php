@@ -36,7 +36,7 @@ if ($adminCurrentPage === 'orders-details' && isset($orderId) && (int) $orderId 
     $adminOrderDetailsHref .= '?id=' . (int) $orderId;
 }
 ?>
-<aside class="sidebar">
+<aside class="sidebar" id="adminSidebar" aria-label="Admin navigation">
     <div class="sidebar-top">
         <a href="admin-home.php" class="brand" aria-label="JKC Cafe Admin Home">
             <img src="../images/logo.svg" alt="JKC Cafe logo">
@@ -114,3 +114,4 @@ if ($adminCurrentPage === 'orders-details' && isset($orderId) && (int) $orderId 
         </ul>
     </div>
 </aside>
+<div class="sidebar-backdrop" data-admin-sidebar-backdrop hidden></div>

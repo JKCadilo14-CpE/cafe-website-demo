@@ -410,6 +410,15 @@ input {
     transform: scale(0.96);
 }
 
+.sidebar-toggle {
+    z-index: 65;
+    display: none;
+}
+
+.sidebar-backdrop {
+    display: none;
+}
+
 .notification-badge {
     position: absolute;
     top: -2px;
@@ -970,6 +979,139 @@ body.dark-mode .nav-link.active i {
         width: auto;
         max-width: none;
         transform-origin: bottom center;
+    }
+}
+
+@media (max-width: 980px), (hover: none) and (pointer: coarse) {
+    body.admin-sidebar-open {
+        overflow: hidden;
+    }
+
+    .sidebar-toggle {
+        display: inline-grid;
+    }
+
+    .admin-main,
+    .admin-layout:has(.sidebar:hover) .admin-main {
+        margin-left: 0;
+    }
+
+    .topbar {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .topbar-context {
+        grid-column: 2;
+    }
+
+    .topbar-search-area {
+        grid-column: 1 / -1;
+    }
+
+    .topbar-actions {
+        grid-column: 3;
+    }
+
+    .sidebar,
+    .sidebar:hover {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 120;
+        width: min(300px, calc(100vw - 40px));
+        height: 100dvh;
+        padding: 18px 14px;
+        border-right: 1px solid var(--line);
+        border-bottom: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        transform: translateX(-105%);
+        visibility: hidden;
+        pointer-events: none;
+        transition: transform 0.28s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.28s ease;
+    }
+
+    body.admin-sidebar-open .sidebar,
+    body.admin-sidebar-open .sidebar:hover {
+        transform: translateX(0);
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .sidebar-top {
+        gap: 18px;
+    }
+
+    .brand {
+        height: auto;
+        min-height: 58px;
+        padding: 0 8px;
+    }
+
+    .brand span,
+    .sidebar:hover .brand span,
+    .nav-link span,
+    .sidebar:hover .nav-link span {
+        opacity: 1;
+        transform: none;
+    }
+
+    .sidebar-nav,
+    .sidebar-bottom {
+        width: 100%;
+    }
+
+    .nav-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .nav-item {
+        padding: 0;
+    }
+
+    .nav-item::after {
+        display: none;
+    }
+
+    .nav-link {
+        min-height: 46px;
+        padding: 11px 12px;
+        white-space: normal;
+    }
+
+    .nav-link i {
+        width: 24px;
+        min-width: 24px;
+        font-size: 1.05rem;
+    }
+
+    .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 110;
+        display: block;
+        background: rgba(11, 18, 15, 0.44);
+        backdrop-filter: blur(2px);
+    }
+
+    .sidebar-backdrop[hidden] {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .topbar {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .topbar-context {
+        grid-column: 2;
+    }
+
+    .topbar-actions {
+        grid-column: 1 / -1;
     }
 }
 

@@ -58,6 +58,10 @@ $adminProfileImage = app_profile_image_src((string) ($_SESSION['profile_image'] 
 $adminProfileImageSrc = app_admin_asset_src($adminProfileImage);
 ?>
 <header class="topbar" aria-label="Admin toolbar">
+    <button type="button" class="icon-button sidebar-toggle" aria-label="Open admin navigation" aria-expanded="false" aria-controls="adminSidebar" data-admin-sidebar-toggle>
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+    </button>
+
     <div class="topbar-context" aria-label="Current admin page">
         <span class="topbar-kicker"><?php echo e($adminPageKicker); ?></span>
         <strong><?php echo e($adminPageTitle); ?></strong>

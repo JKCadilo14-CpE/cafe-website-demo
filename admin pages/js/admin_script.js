@@ -9,6 +9,113 @@ const closeMoreMenu = (moreMenu, moreMenuButton) => {
     moreMenuButton.setAttribute('aria-expanded', 'false');
 };
 
+const closeNotificationMenu = () => {
+    const notificationMenu = document.querySelector('.notification-menu');
+    const notificationButton = document.querySelector('.notification-button');
+    const notificationDropdown = document.querySelector('.notification-dropdown');
+
+    if (!notificationMenu || !notificationButton || !notificationDropdown) {
+        return;
+    }
+
+    notificationDropdown.hidden = true;
+    notificationMenu.classList.remove('is-open');
+    notificationButton.setAttribute('aria-expanded', 'false');
+};
+
+const setupSidebarToggle = (moreMenu, moreMenuButton) => {
+    const sidebar = document.querySelector('#adminSidebar');
+    const sidebarToggle = document.querySelector('[data-admin-sidebar-toggle]');
+    const sidebarBackdrop = document.querySelector('[data-admin-sidebar-backdrop]');
+
+    if (!sidebar || !sidebarToggle || !sidebarBackdrop) {
+        return;
+    }
+
+    const responsiveSidebarQuery = window.matchMedia('(max-width: 980px), (hover: none) and (pointer: coarse)');
+
+    const isSidebarOpen = () => document.body.classList.contains('admin-sidebar-open');
+
+    const setToggleState = (isOpen) => {
+        sidebarToggle.setAttribute('aria-expanded', String(isOpen));
+        sidebarToggle.setAttribute('aria-label', isOpen ? 'Close admin navigation' : 'Open admin navigation');
+        sidebar.setAttribute('aria-hidden', String(!isOpen && responsiveSidebarQuery.matches));
+    };
+
+    const closeSidebar = ({ restoreFocus = false } = {}) => {
+        const wasOpen = isSidebarOpen();
+
+        document.body.classList.remove('admin-sidebar-open');
+        sidebarBackdrop.hidden = true;
+        setToggleState(false);
+
+        if (restoreFocus && wasOpen) {
+            sidebarToggle.focus();
+        }
+    };
+
+    const openSidebar = () => {
+        if (!responsiveSidebarQuery.matches) {
+            return;
+        }
+
+        closeMoreMenu(moreMenu, moreMenuButton);
+        closeNotificationMenu();
+
+        sidebarBackdrop.hidden = false;
+        document.body.classList.add('admin-sidebar-open');
+        setToggleState(true);
+    };
+
+    const toggleSidebar = () => {
+        if (isSidebarOpen()) {
+            closeSidebar({ restoreFocus: true });
+            return;
+        }
+
+        openSidebar();
+    };
+
+    const syncResponsiveState = () => {
+        if (!responsiveSidebarQuery.matches) {
+            closeSidebar();
+            sidebar.removeAttribute('aria-hidden');
+            return;
+        }
+
+        setToggleState(isSidebarOpen());
+    };
+
+    sidebarToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleSidebar();
+    });
+
+    sidebarBackdrop.addEventListener('click', () => {
+        closeSidebar({ restoreFocus: true });
+    });
+
+    sidebar.addEventListener('click', (event) => {
+        if (event.target.closest('.nav-link') && responsiveSidebarQuery.matches) {
+            closeSidebar();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && isSidebarOpen()) {
+            closeSidebar({ restoreFocus: true });
+        }
+    });
+
+    if (typeof responsiveSidebarQuery.addEventListener === 'function') {
+        responsiveSidebarQuery.addEventListener('change', syncResponsiveState);
+    } else if (typeof responsiveSidebarQuery.addListener === 'function') {
+        responsiveSidebarQuery.addListener(syncResponsiveState);
+    }
+
+    syncResponsiveState();
+};
+
 const normalizeText = (value) => value.toLowerCase().replace(/\s+/g, ' ').trim();
 
 const filterElements = (elements, searchTerm) => {
@@ -388,6 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    setupSidebarToggle(moreMenu, moreMenuButton);
     setupSearch();
     setupNotificationCount();
 });
