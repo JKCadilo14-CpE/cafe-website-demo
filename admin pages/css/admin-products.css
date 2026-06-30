@@ -568,7 +568,7 @@ body.dark-mode .product-price-cell {
     }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
     .products-panel-header,
     .products-header-actions {
         align-items: stretch;
@@ -698,6 +698,7 @@ body.dark-mode .product-price-cell {
     }
 
     .product-action-button {
+        min-height: 44px;
         width: 100%;
     }
 
