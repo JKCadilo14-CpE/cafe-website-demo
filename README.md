@@ -6,18 +6,31 @@
 ![Playwright](https://img.shields.io/badge/Tested_with-Playwright-2EAD33?logo=playwright&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Active-success)
+![Responsive](https://img.shields.io/badge/Responsive-320px--1440px-0b7a5a)
+![Portfolio Project](https://img.shields.io/badge/Portfolio-Project-8a5a2b)
 ![GitHub release](https://img.shields.io/github/v/release/JKCadilo14-CpE/cafe-website-demo)
 
 JKC Cafe is a full-stack cafe ordering portfolio project built with PHP and MySQL/MariaDB. It includes a customer-facing storefront for browsing products and placing demo orders, plus an admin dashboard for managing menu items, orders, users, and customer messages.
 
 > **Portfolio Project:** This application is intended for demonstration and educational purposes. Payment and recovery workflows are simulated.
 
+## ✨ Highlights
+
+- Full-stack PHP and MySQL/MariaDB cafe ordering application
+- Responsive customer storefront and admin dashboard interfaces
+- Responsive UI verified across common viewport widths from 320px to 1440px
+- Admin tools for products, orders, users, customer messages, and analytics
+- Playwright browser smoke testing for core customer and admin flows
+- Portfolio/demo-friendly payment and recovery workflows
+
 ## 📑 Table of Contents
 
 - [Live Demo](#live-demo)
+- [Highlights](#-highlights)
 - [Screenshot Gallery](#screenshot-gallery)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
+- [Key Learnings](#-key-learnings)
 - [Local Setup](#local-setup)
 - [Testing](#testing)
 - [Deployment Notes](#deployment-notes)
@@ -55,12 +68,18 @@ All screenshots below were captured at a 1440×900 desktop layout using isolated
 | Dashboard | ![JKC Cafe admin dashboard](docs/screenshots/admin-dashboard.png) |
 | Manage products | ![JKC Cafe manage products](docs/screenshots/admin-products.png) |
 | Manage orders | ![JKC Cafe manage orders](docs/screenshots/admin-orders.png) |
+| Users | ![JKC Cafe admin users](docs/screenshots/admin-users.png) |
+| Analytics | ![JKC Cafe admin analytics](docs/screenshots/admin-analytics.png) |
+| Contact messages | ![JKC Cafe admin contact messages](docs/screenshots/admin-contact-messages.png) |
+| Settings | ![JKC Cafe admin settings](docs/screenshots/admin-settings.png) |
 
 ## Features
 
 ### Customer experience
 
 - Responsive homepage, menu, about, rewards, and contact pages
+- Mobile-responsive customer experience across storefront, account, cart, and checkout pages
+- Responsive UI verified across common viewport sizes from 320px to 1440px
 - Product search, category filtering, cart management, and order summary
 - Account registration, login, profile, settings, and order tracking
 - Demo checkout flows for cash on delivery, card, and GCash
@@ -69,6 +88,9 @@ All screenshots below were captured at a 1440×900 desktop layout using isolated
 ### Admin experience
 
 - Dashboard metrics and recent activity overview
+- Responsive admin dashboard for desktop, tablet, and mobile workflows
+- Mobile sidebar navigation for touch devices
+- Responsive admin tables and forms for products, orders, users, and analytics
 - Product creation, editing, availability updates, and image uploads
 - Order status management and customer-message review
 - User administration, admin profile, and account settings
@@ -78,8 +100,19 @@ All screenshots below were captured at a 1440×900 desktop layout using isolated
 - PHP 8.2+
 - MySQL 8+ or MariaDB 10.4+
 - HTML, CSS, and vanilla JavaScript
+- Font Awesome 6 for admin interface icons
 - XAMPP for local Apache/MySQL development
 - Playwright for browser smoke tests
+- InfinityFree for live demo hosting
+
+## 📚 Key Learnings
+
+- Structuring PHP CRUD flows for products, orders, users, profiles, and messages
+- Designing responsive customer and admin interfaces with shared and page-specific CSS
+- Organizing modular CSS and vanilla JavaScript for navigation, filters, uploads, settings, and admin interactions
+- Modeling relational data for users, products, orders, order items, notifications, and contact messages
+- Using Playwright to smoke test browser flows and catch responsive regressions
+- Debugging UI state issues around sticky navigation, drawer overlays, touch targets, and table/card layouts
 
 ## Local Setup
 
@@ -226,14 +259,25 @@ Dashboard --> Uploads[(Uploads Directory)]
 
 ---
 
-### 🚧 Version 1.0.1 — Responsive UI Improvements
+### ✅ Version 1.0.1 — Responsive UI Improvements
 
-- [ ] Improve mobile responsiveness across all pages
-- [ ] Fix remaining layout and spacing inconsistencies
-- [ ] Improve checkout forms on small screens
-- [ ] Optimize admin pages for tablets
-- [ ] Improve touch targets and mobile usability
-- [ ] Test common screen sizes (320px–1440px)
+- [x] Improve mobile responsiveness across all pages
+- [x] Fix remaining layout and spacing inconsistencies
+- [x] Improve checkout forms on small screens
+- [x] Optimize admin pages for tablets
+- [x] Improve touch targets and mobile usability
+- [x] Test common screen sizes (320px–1440px)
+
+Completed responsive improvements:
+
+- Customer mobile navbar, avatar dropdown, sticky behavior, and scroll-lock fixes
+- Hidden mobile nav click-target fix after closing the hamburger menu
+- Mobile menu reveal animation trigger fix
+- Checkout GCash QR/payment image containment fix
+- Profile notification touch-target improvement
+- Admin mobile/tablet sidebar toggle with backdrop and keyboard close behavior
+- Admin tables, cards, forms, and action controls responsiveness improvements
+- Final responsive regression test across 320px–1440px
 
 ---
 
