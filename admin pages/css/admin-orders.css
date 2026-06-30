@@ -1085,4 +1085,106 @@ body.dark-mode .order-status-flow li.cancelled.is-current span {
     .orders-list-card {
         min-height: 240px;
     }
+
+    .order-items-wrap {
+        overflow-x: visible;
+    }
+
+    .order-items-table {
+        min-width: 0;
+        border-collapse: separate;
+        border-spacing: 0 14px;
+    }
+
+    .order-items-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    .order-items-table,
+    .order-items-table tbody,
+    .order-items-table tr,
+    .order-items-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .order-items-table tbody tr {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        overflow: hidden;
+    }
+
+    .order-items-table th,
+    .order-items-table td {
+        border-top: 0;
+    }
+
+    .order-items-table td {
+        display: grid;
+        grid-template-columns: minmax(84px, 0.34fr) minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+        padding: 12px 14px;
+        border-top: 1px solid var(--line);
+        overflow-wrap: anywhere;
+    }
+
+    .order-items-table td:first-child {
+        border-top: 0;
+    }
+
+    .order-items-table td::before {
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .order-items-table td:nth-child(1) {
+        display: block;
+    }
+
+    .order-items-table td:nth-child(1)::before {
+        content: "Product";
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .order-items-table td:nth-child(2)::before {
+        content: "Quantity";
+    }
+
+    .order-items-table td:nth-child(3)::before {
+        content: "Price";
+    }
+
+    .order-items-table td:nth-child(4)::before {
+        content: "Line Total";
+    }
+
+    .order-items-table td.empty-state {
+        display: block;
+        text-align: center;
+    }
+
+    .order-items-table td.empty-state::before {
+        content: none;
+    }
+
+    .order-product-cell {
+        align-items: flex-start;
+    }
+
+    .order-status-select {
+        min-width: 0;
+        min-height: 46px;
+    }
 }
