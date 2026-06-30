@@ -844,7 +844,7 @@ body.dark-mode .order-status-badge.cancelled {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 38px;
+    min-height: 44px;
     padding: 9px 12px;
     color: var(--sb-green);
     background: rgba(0, 98, 65, 0.08);

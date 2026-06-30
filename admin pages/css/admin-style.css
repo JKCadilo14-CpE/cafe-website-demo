@@ -1442,7 +1442,7 @@ body.dark-mode .form-field input:disabled {
 }
 
 .category-chip {
-    min-height: 34px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;

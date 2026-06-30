@@ -85,6 +85,7 @@ background: rgba(0, 98, 65, 0.05);
 
 .role-select {
     min-width: 130px;
+    min-height: 44px;
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 10px 12px;
