@@ -463,24 +463,109 @@ function app_user_role(): int
     return (int) ($_SESSION['role'] ?? -1);
 }
 
+function app_account_status_allows_session(?string $status): bool
+{
+    $normalized = strtolower(trim((string) $status));
+
+    if ($normalized === '') {
+        return true;
+    }
+
+    return !in_array($normalized, ['deleted', 'inactive', 'disabled', 'suspended'], true);
+}
+
+function app_refresh_current_user_session(): ?array
+{
+    static $cachedUserId = null;
+    static $cachedUser = null;
+
+    if (!app_is_logged_in()) {
+        $cachedUserId = null;
+        $cachedUser = null;
+
+        return null;
+    }
+
+    $userId = (int) $_SESSION['user_id'];
+
+    if ($cachedUserId === $userId) {
+        return $cachedUser;
+    }
+
+    $cachedUserId = $userId;
+    $cachedUser = null;
+
+    try {
+        $mysqli = app_db();
+        app_ensure_profile_image_column($mysqli);
+        $statement = $mysqli->prepare('SELECT id, username, email, role, account_status, profile_image FROM users WHERE id = ? LIMIT 1');
+        $statement->bind_param('i', $userId);
+        $statement->execute();
+        $result = $statement->get_result();
+        $user = $result->fetch_assoc();
+        $result->free();
+        $statement->close();
+        $mysqli->close();
+    } catch (mysqli_sql_exception $exception) {
+        return null;
+    }
+
+    if ($user === null || !app_account_status_allows_session((string) ($user['account_status'] ?? 'active'))) {
+        app_destroy_session();
+
+        return null;
+    }
+
+    $accountStatus = trim((string) ($user['account_status'] ?? ''));
+
+    if ($accountStatus === '') {
+        $accountStatus = 'active';
+    }
+
+    $profileImage = app_profile_image_src((string) ($user['profile_image'] ?? ''));
+    $cachedUser = [
+        'id' => (int) $user['id'],
+        'username' => (string) $user['username'],
+        'email' => (string) $user['email'],
+        'role' => (int) $user['role'],
+        'account_status' => $accountStatus,
+        'profile_image' => $profileImage,
+    ];
+
+    $_SESSION['user_id'] = $cachedUser['id'];
+    $_SESSION['username'] = $cachedUser['username'];
+    $_SESSION['email'] = $cachedUser['email'];
+    $_SESSION['role'] = $cachedUser['role'];
+    $_SESSION['account_status'] = $cachedUser['account_status'];
+    $_SESSION['profile_image'] = $cachedUser['profile_image'];
+
+    return $cachedUser;
+}
+
 function app_is_admin(): bool
 {
-    return app_is_logged_in() && app_user_role() === 1;
+    $user = app_refresh_current_user_session();
+
+    return $user !== null && (int) $user['role'] === 1;
 }
 
 function app_dashboard_for_current_user(): string
 {
-    return app_is_admin() ? 'admin pages/admin-home.php' : 'profile.php';
+    $user = app_refresh_current_user_session();
+
+    return $user !== null && (int) $user['role'] === 1 ? 'admin pages/admin-home.php' : 'profile.php';
 }
 
 function app_require_admin(string $loginPath = '../login.php', string $userPath = '../profile.php'): void
 {
-    if (!app_is_logged_in()) {
+    $user = app_refresh_current_user_session();
+
+    if ($user === null) {
         header('Location: ' . $loginPath);
         exit();
     }
 
-    if (!app_is_admin()) {
+    if ((int) $user['role'] !== 1) {
         header('Location: ' . $userPath);
         exit();
     }

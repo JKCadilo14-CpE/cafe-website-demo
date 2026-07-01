@@ -352,6 +352,48 @@ test.describe('Session rate limiting', () => {
   });
 });
 
+test.describe('Admin authorization refresh', () => {
+  test('regular customer is redirected away from admin pages', async ({ page }) => {
+    await signupTestUser(page);
+
+    await page.goto(new URL('admin pages/admin-home.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+
+    await expect(page).toHaveURL(/profile\.php/);
+  });
+
+  test('admin JSON endpoint returns JSON 403 for a regular customer', async ({ page }) => {
+    await signupTestUser(page);
+
+    const response = await page.request.get(new URL('admin pages/admin_topbar_data.php', baseURL).toString(), {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    expect(response.status()).toBe(403);
+    expect(response.headers()['content-type']).toContain('application/json');
+    expect(await response.json()).toHaveProperty('error', 'Forbidden');
+  });
+
+  test('configured admin can still log in and reach the dashboard', async ({ page }) => {
+    const adminEmail = process.env.ADMIN_EMAIL || '';
+    const adminPassword = process.env.ADMIN_PASSWORD || '';
+    test.skip(adminEmail === '' || adminPassword === '', 'Set ADMIN_EMAIL and ADMIN_PASSWORD to exercise admin login after refresh.');
+
+    await loginWithCredentials(page, adminEmail, adminPassword);
+    await expect(page).toHaveURL(/admin-home\.php/);
+
+    const response = await page.goto(new URL('admin pages/admin-home.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+
+    expect(response?.ok()).toBe(true);
+    await expect(page).toHaveURL(/admin-home\.php/);
+  });
+});
+
 test.describe('Shared password policy', () => {
   test('signup rejects passwords shorter than the shared minimum', async ({ page }) => {
     await page.goto(new URL('signup.php', baseURL).toString(), {
