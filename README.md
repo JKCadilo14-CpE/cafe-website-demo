@@ -4,9 +4,12 @@
 ![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?logo=mysql&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Tested_with-Playwright-2EAD33?logo=playwright&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 ![Status](https://img.shields.io/badge/Status-Active-success)
 ![Responsive](https://img.shields.io/badge/Responsive-320px--1440px-0b7a5a)
+![Security Hardened](https://img.shields.io/badge/Security-Hardened-0b7a5a)
+![CSRF Protected](https://img.shields.io/badge/CSRF-Protected-2EAD33)
+![Admin Dashboard](https://img.shields.io/badge/Admin-Dashboard-8a5a2b)
 ![Portfolio Project](https://img.shields.io/badge/Portfolio-Project-8a5a2b)
 ![GitHub release](https://img.shields.io/github/v/release/JKCadilo14-CpE/cafe-website-demo)
 
@@ -14,29 +17,68 @@ JKC Cafe is a full-stack cafe ordering portfolio project built with PHP and MySQ
 
 > **Portfolio Project:** This application is intended for demonstration and educational purposes. Payment and recovery workflows are simulated.
 
+## 🚀 Latest Release
+
+Current Version: **v1.1.0**
+
+Major additions include:
+
+- CSRF protection
+- Session hardening
+- Secure POST logout
+- Shared password policy
+- Session-based rate limiting
+- Admin authorization refresh
+- Transactional admin safeguards
+- Expanded Playwright security testing
+
+## 📊 Project Snapshot
+
+- 18 customer-facing PHP routes
+- 13 admin PHP routes
+- Responsive interface tested from 320px to 1440px
+- Automated Playwright regression suite
+- Security/auth hardening through v1.1.0
+- Live demo deployment
+- MIT licensed
+
+## 📈 Repository Statistics
+
+- ~40 PHP files
+- 18 customer routes
+- 13 admin routes
+- Responsive from 320px–1440px
+- 27+ automated Playwright tests
+- MIT License
+
 ## ✨ Highlights
 
 - Full-stack PHP and MySQL/MariaDB cafe ordering application
-- Responsive customer storefront and admin dashboard interfaces
+- Customer storefront with menu browsing, cart, demo checkout, profile, rewards, and contact flows
+- Admin dashboard for products, orders, users, customer messages, analytics, and settings
 - Responsive UI verified across common viewport widths from 320px to 1440px
-- Admin tools for products, orders, users, customer messages, and analytics
-- Playwright browser smoke testing for core customer and admin flows
-- Focused security/auth hardening for CSRF, sessions, logout, rate limiting, and admin authorization
-- Portfolio/demo-friendly payment and recovery workflows
+- Security/authentication hardening for CSRF, sessions, logout, password validation, rate limiting, and admin authorization
+- Automated Playwright testing for smoke, responsive, and security/auth regression coverage
+- Portfolio-ready documentation, screenshots, setup notes, and architecture notes
+- Demo-friendly payment and password recovery workflows
 
 ## 📑 Table of Contents
 
 - [Live Demo](#live-demo)
+- [Latest Release](#-latest-release)
+- [Project Snapshot](#-project-snapshot)
 - [Highlights](#-highlights)
 - [Screenshot Gallery](#screenshot-gallery)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Key Learnings](#-key-learnings)
+- [Quick Start](#quick-start)
 - [Local Setup](#local-setup)
 - [Testing](#testing)
 - [Deployment Notes](#deployment-notes)
 - [Repository Structure](#repository-structure)
 - [Application Architecture](#-application-architecture)
+- [Design Principles](#design-principles)
 - [Roadmap](#-roadmap)
 - [Author](#author)
 
@@ -98,13 +140,27 @@ All screenshots below were captured at a 1440×900 desktop layout using isolated
 
 ## Tech Stack
 
+**Backend**
 - PHP 8.2+
-- MySQL 8+ or MariaDB 10.4+
+- Shared PHP helper/bootstrap layer
+
+**Frontend**
 - HTML, CSS, and vanilla JavaScript
 - Font Awesome 6 for admin interface icons
-- XAMPP for local Apache/MySQL development
-- Playwright for browser smoke tests
+
+**Database**
+- MySQL 8+ or MariaDB 10.4+
+
+**Testing**
+- Playwright for browser smoke and security/auth regression tests
+- PHP syntax linting
+
+**Deployment**
 - InfinityFree for live demo hosting
+
+**Development Tools**
+- XAMPP for local Apache/MySQL development
+- npm and Node.js for Playwright tooling
 
 ## 📚 Key Learnings
 
@@ -115,6 +171,22 @@ All screenshots below were captured at a 1440×900 desktop layout using isolated
 - Using Playwright to smoke test browser flows and catch responsive regressions
 - Applying CSRF protection, session hardening, session-based rate limiting, and admin authorization safeguards in PHP
 - Debugging UI state issues around sticky navigation, drawer overlays, touch targets, and table/card layouts
+
+## Quick Start
+
+```text
+Clone repository
+        ↓
+Copy config.example.php → config.local.php
+        ↓
+Import database/schema.sql
+        ↓
+Start Apache + MySQL
+        ↓
+Open http://localhost/Project/
+```
+
+For exact commands and local admin setup, follow the full Local Setup instructions below.
 
 ## Local Setup
 
@@ -244,7 +316,21 @@ Orders --> DB
 Dashboard --> Uploads[(Uploads Directory)]
 ```
 
+## Design Principles
+
+- Shared helper layer in `components/app.php`
+- Server-side validation for all sensitive operations
+- Prepared SQL statements
+- CSRF protection
+- Shared security helpers centralize CSRF, session, and authentication logic
+- Security-sensitive operations use reusable validation helpers instead of duplicated checks
+- Progressive enhancement
+- Mobile-first responsiveness for user-facing pages
+- Security-first authentication flow
+
 ## 🗺️ Roadmap
+
+This roadmap documents the project's evolution from the first public portfolio release through focused responsive, security, and production-readiness improvements.
 
 ### ✅ Version 1.0.0 — First Public Portfolio Release
 
@@ -286,7 +372,7 @@ Completed responsive improvements:
 
 ---
 
-### ✅ Version 1.1.0 — Security & Stability
+### ✅ Version 1.1.0 — Security & Authentication Hardening
 
 - [x] CSRF protection across state-changing POST actions
 - [x] POST-only logout with CSRF validation
@@ -314,7 +400,7 @@ This release improves the security baseline for a portfolio/demo application, bu
 
 ---
 
-### 🧱 Version 1.2.0 — Data Integrity & Production Readiness
+### 🧱 Version 1.2.0 — Data Integrity & Production Readiness Improvements
 
 - [ ] Add database constraints and foreign keys
 - [ ] Remove runtime schema creation and seeding
