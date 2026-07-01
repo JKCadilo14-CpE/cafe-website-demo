@@ -21,6 +21,7 @@ JKC Cafe is a full-stack cafe ordering portfolio project built with PHP and MySQ
 - Responsive UI verified across common viewport widths from 320px to 1440px
 - Admin tools for products, orders, users, customer messages, and analytics
 - Playwright browser smoke testing for core customer and admin flows
+- Focused security/auth hardening for CSRF, sessions, logout, rate limiting, and admin authorization
 - Portfolio/demo-friendly payment and recovery workflows
 
 ## 📑 Table of Contents
@@ -112,6 +113,7 @@ All screenshots below were captured at a 1440×900 desktop layout using isolated
 - Organizing modular CSS and vanilla JavaScript for navigation, filters, uploads, settings, and admin interactions
 - Modeling relational data for users, products, orders, order items, notifications, and contact messages
 - Using Playwright to smoke test browser flows and catch responsive regressions
+- Applying CSRF protection, session hardening, session-based rate limiting, and admin authorization safeguards in PHP
 - Debugging UI state issues around sticky navigation, drawer overlays, touch targets, and table/card layouts
 
 ## Local Setup
@@ -184,6 +186,8 @@ $env:BASE_URL = 'http://localhost/Project/'
 npx playwright test --project=chromium
 ```
 
+The Playwright suite includes public-page smoke tests plus focused security/auth regression coverage for CSRF, logout, session cookies, rate limiting, password validation, and admin authorization behavior. Admin-only tests can be exercised by setting `ADMIN_EMAIL` and `ADMIN_PASSWORD` for a local admin account.
+
 Run PHP syntax checks for all application files:
 
 ```powershell
@@ -212,6 +216,7 @@ user-css/          Customer-facing stylesheets
 user-js/           Customer-facing JavaScript
 images/            Public visual assets
 database/schema.sql Sanitized schema and safe product seed data
+docs/              Screenshots and project documentation
 tests/             Playwright smoke tests
 ```
 
@@ -281,15 +286,42 @@ Completed responsive improvements:
 
 ---
 
-### 🔒 Version 1.1.0 — Security & Stability
+### ✅ Version 1.1.0 — Security & Stability
 
-- [ ] Add CSRF protection
-- [ ] Configure secure session cookies
-- [ ] Add server-side password validation
-- [ ] Add database constraints (e.g. UNIQUE email, foreign keys)
+- [x] CSRF protection across state-changing POST actions
+- [x] POST-only logout with CSRF validation
+- [x] Hardened session cookie settings
+- [x] Conservative browser security headers
+- [x] Shared password policy and server-side password validation
+- [x] Session-based rate limiting for sensitive forms
+- [x] Admin authorization refresh from the database
+- [x] Admin role/delete safeguards
+- [x] Expanded Playwright security/auth test coverage
+
+Completed security/auth hardening:
+
+- Shared CSRF helpers for token generation, hidden fields, validation, and safe rejection
+- Secure session bootstrap with strict mode, cookie-only sessions, HttpOnly cookies, SameSite=Lax, and HTTPS-aware Secure cookies
+- POST logout flow for customer and admin navigation
+- Conservative global headers including `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, and `Permissions-Policy`
+- Shared minimum password policy used by signup, customer password changes, and admin password changes
+- Session-based throttling for login, signup, forgot-password demo, contact, and password-change attempts
+- Admin role/status refresh from the database before admin authorization checks
+- Transactional admin role/delete safeguards for self-demotion, self-delete, and last-admin protections
+- Playwright regression tests for CSRF, logout, cookies, rate limiting, password policy, admin authorization, and admin user safeguards
+
+This release improves the security baseline for a portfolio/demo application, but it should not be treated as fully production-ready security.
+
+---
+
+### 🧱 Version 1.2.0 — Data Integrity & Production Readiness
+
+- [ ] Add database constraints and foreign keys
 - [ ] Remove runtime schema creation and seeding
+- [ ] Introduce migration workflow
+- [ ] Harden upload validation
+- [ ] Add CSP compatibility pass
 - [ ] Improve GitHub Actions CI
-- [ ] Expand Playwright test coverage
 
 ---
 
