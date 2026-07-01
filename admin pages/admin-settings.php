@@ -170,6 +170,7 @@ try {
             $currentPassword = (string) ($_POST['current_password'] ?? '');
             $newPassword = (string) ($_POST['new_password'] ?? '');
             $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
+            $passwordErrors = app_validate_password($newPassword);
 
             $passwordStatement = $mysqli->prepare('SELECT password FROM users WHERE id = ? LIMIT 1');
             $passwordStatement->bind_param('i', $admin['id']);
@@ -180,8 +181,8 @@ try {
             if ($passwordRow === null || !password_verify($currentPassword, (string) $passwordRow['password'])) {
                 $message = 'Current password is incorrect.';
                 $messageType = 'error';
-            } elseif (strlen($newPassword) < 8) {
-                $message = 'New password must be at least 8 characters.';
+            } elseif ($passwordErrors !== []) {
+                $message = $passwordErrors[0];
                 $messageType = 'error';
             } elseif ($newPassword !== $confirmPassword) {
                 $message = 'New password and confirmation do not match.';
@@ -417,12 +418,12 @@ $avatarInitial = strtoupper(substr(trim((string) ($admin['username'] ?? 'A')) !=
                                 </div>
                                 <div class="form-field">
                                     <label for="new_password">New Password</label>
-                                    <input type="password" id="new_password" name="new_password" minlength="8" autocomplete="new-password" required>
-                                    <p class="settings-field-help">Use at least 8 characters. A longer phrase is easier to remember and harder to guess.</p>
+                                    <input type="password" id="new_password" name="new_password" minlength="<?php echo app_password_min_length(); ?>" autocomplete="new-password" required>
+                                    <p class="settings-field-help"><?php echo e(app_password_policy_text()); ?> A longer phrase is easier to remember and harder to guess.</p>
                                 </div>
                                 <div class="form-field">
                                     <label for="confirm_password">Confirm New Password</label>
-                                    <input type="password" id="confirm_password" name="confirm_password" minlength="8" autocomplete="new-password" required>
+                                    <input type="password" id="confirm_password" name="confirm_password" minlength="<?php echo app_password_min_length(); ?>" autocomplete="new-password" required>
                                     <p class="settings-field-help">Type the same new password again before saving.</p>
                                 </div>
                                 <button type="submit" class="settings-action-button primary">

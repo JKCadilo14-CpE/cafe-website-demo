@@ -213,12 +213,16 @@ try {
                 $currentPassword = (string) ($_POST['current_password'] ?? '');
                 $newPassword = (string) ($_POST['new_password'] ?? '');
                 $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
+                $passwordErrors = app_validate_password($newPassword);
 
                 if ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
                     $message = 'Please complete all password fields.';
                     $messageType = 'error';
                 } elseif (!password_verify($currentPassword, $account['password'])) {
                     $message = 'Current password is incorrect.';
+                    $messageType = 'error';
+                } elseif ($passwordErrors !== []) {
+                    $message = $passwordErrors[0];
                     $messageType = 'error';
                 } elseif ($newPassword !== $confirmPassword) {
                     $message = 'New passwords do not match.';
@@ -587,7 +591,7 @@ $initials = app_initials($displayName);
             <div class="login-field" data-input-glow>
               <label for="settings-new-password">New password</label>
               <div class="password-control">
-                <input id="settings-new-password" name="new_password" type="password" autocomplete="new-password" required data-password-input>
+                <input id="settings-new-password" name="new_password" type="password" autocomplete="new-password" minlength="<?php echo app_password_min_length(); ?>" required data-password-input>
                 <button type="button" aria-label="Show password" data-password-toggle>
                   <span data-password-toggle-text>Show</span>
                 </button>
@@ -597,7 +601,7 @@ $initials = app_initials($displayName);
             <div class="login-field" data-input-glow>
               <label for="settings-confirm-password">Confirm new password</label>
               <div class="password-control">
-                <input id="settings-confirm-password" name="confirm_password" type="password" autocomplete="new-password" required data-password-input>
+                <input id="settings-confirm-password" name="confirm_password" type="password" autocomplete="new-password" minlength="<?php echo app_password_min_length(); ?>" required data-password-input>
                 <button type="button" aria-label="Show password" data-password-toggle>
                   <span data-password-toggle-text>Show</span>
                 </button>
@@ -605,6 +609,7 @@ $initials = app_initials($displayName);
             </div>
 
             <ul class="settings-security-list" aria-label="Password tips">
+              <li><i class="fa-solid fa-check" aria-hidden="true"></i><?php echo e(app_password_policy_text()); ?></li>
               <li><i class="fa-solid fa-check" aria-hidden="true"></i>Use a password you do not reuse elsewhere.</li>
               <li><i class="fa-solid fa-check" aria-hidden="true"></i>Mix letters, numbers, and a symbol for a stronger key.</li>
             </ul>

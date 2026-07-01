@@ -108,6 +108,27 @@ function e(string $value): string
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
+function app_password_min_length(): int
+{
+    return 8;
+}
+
+function app_validate_password(string $password): array
+{
+    $errors = [];
+
+    if (strlen($password) < app_password_min_length()) {
+        $errors[] = 'Password must be at least ' . app_password_min_length() . ' characters.';
+    }
+
+    return $errors;
+}
+
+function app_password_policy_text(): string
+{
+    return 'Use at least ' . app_password_min_length() . ' characters.';
+}
+
 function app_csrf_token(): string
 {
     if (!isset($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token']) || $_SESSION['csrf_token'] === '') {

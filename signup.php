@@ -19,12 +19,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $password = (string) ($_POST['password'] ?? '');
     $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
+    $passwordErrors = app_validate_password($password);
 
     if ($username === '' || $email === '' || $password === '' || $confirmPassword === '') {
         $message = 'Please complete all signup fields.';
         $messageType = 'error';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $message = 'Please enter a valid email address.';
+        $messageType = 'error';
+    } elseif ($passwordErrors !== []) {
+        $message = $passwordErrors[0];
         $messageType = 'error';
     } elseif ($password !== $confirmPassword) {
         $message = 'Passwords do not match.';
@@ -142,18 +146,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="login-field" data-input-glow>
             <label for="signup-password">Password</label>
             <div class="password-control">
-              <input id="signup-password" name="password" type="password" placeholder="Create a password" autocomplete="new-password" aria-describedby="signup-password-help" required data-password-input>
+              <input id="signup-password" name="password" type="password" placeholder="Create a password" autocomplete="new-password" aria-describedby="signup-password-help" minlength="<?php echo app_password_min_length(); ?>" required data-password-input>
               <button type="button" aria-label="Show password" data-password-toggle>
                 <span data-password-toggle-text>Show</span>
               </button>
             </div>
           </div>
-          <p id="signup-password-help" class="login-field-note">Choose a private password you do not reuse elsewhere.</p>
+          <p id="signup-password-help" class="login-field-note"><?php echo e(app_password_policy_text()); ?> Choose a private password you do not reuse elsewhere.</p>
 
           <div class="login-field" data-input-glow>
             <label for="signup-confirm-password">Confirm password</label>
             <div class="password-control">
-              <input id="signup-confirm-password" name="confirm_password" type="password" placeholder="Confirm your password" autocomplete="new-password" aria-describedby="signup-confirm-password-help" required data-password-input>
+              <input id="signup-confirm-password" name="confirm_password" type="password" placeholder="Confirm your password" autocomplete="new-password" aria-describedby="signup-confirm-password-help" minlength="<?php echo app_password_min_length(); ?>" required data-password-input>
               <button type="button" aria-label="Show password" data-password-toggle>
                 <span data-password-toggle-text>Show</span>
               </button>

@@ -32,6 +32,16 @@ async function signupTestUser(page) {
   return { email, password };
 }
 
+async function loginWithCredentials(page, email, password) {
+  await page.goto(new URL('login.php', baseURL).toString(), {
+    waitUntil: 'domcontentloaded',
+  });
+  await page.locator('input[name="email"]').fill(email);
+  await page.locator('input[name="password"]').fill(password);
+  await page.getByRole('button', { name: /Sign in/i }).click();
+  await expect(page).not.toHaveURL(/login\.php/);
+}
+
 function expectSecurityHeaders(response) {
   const headers = response.headers();
 
@@ -154,6 +164,101 @@ test.describe('CSRF protection', () => {
 
     expect(response.status()).toBe(403);
     expect(await response.text()).toMatch(/Security check failed/i);
+  });
+});
+
+test.describe('Shared password policy', () => {
+  test('signup rejects passwords shorter than the shared minimum', async ({ page }) => {
+    await page.goto(new URL('signup.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const token = await csrfValue(page);
+    const response = await page.request.post(new URL('signup.php', baseURL).toString(), {
+      form: {
+        csrf_token: token,
+        username: 'Short Password Tester',
+        email: uniqueEmail('short-password'),
+        password: 'short7',
+        confirm_password: 'short7',
+      },
+    });
+
+    expect(response.status()).toBe(200);
+    expect(await response.text()).toMatch(/Password must be at least 8 characters/i);
+  });
+
+  test('signup accepts an 8 character password and the new login still works', async ({ page }) => {
+    const email = uniqueEmail('eight-character-password');
+    const password = 'Pass8888';
+
+    await page.goto(new URL('signup.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+    await page.getByLabel('Username').fill('Eight Character Tester');
+    await page.getByLabel('Email').fill(email);
+    await page.getByLabel('Password', { exact: true }).fill(password);
+    await page.getByLabel('Confirm password').fill(password);
+    await page.getByRole('button', { name: /Create account/i }).click();
+    await expect(page).toHaveURL(/profile\.php|cart\.php/);
+
+    const token = await csrfValue(page, 'form[action="logout.php"] input[name="csrf_token"]');
+    const logoutResponse = await page.request.post(new URL('logout.php', baseURL).toString(), {
+      form: {
+        csrf_token: token,
+      },
+    });
+    expect(logoutResponse.ok()).toBe(true);
+
+    await loginWithCredentials(page, email, password);
+    await expect(page).toHaveURL(/profile\.php|cart\.php|admin/);
+  });
+
+  test('customer password change rejects passwords shorter than the shared minimum', async ({ page }) => {
+    const { password } = await signupTestUser(page);
+
+    await page.goto(new URL('settings.php#settings-password', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const token = await csrfValue(page, 'form[action="settings.php#settings-password"] input[name="csrf_token"]');
+    const response = await page.request.post(new URL('settings.php', baseURL).toString(), {
+      form: {
+        csrf_token: token,
+        action: 'password',
+        current_password: password,
+        new_password: 'short7',
+        confirm_password: 'short7',
+      },
+    });
+
+    expect(response.status()).toBe(200);
+    expect(await response.text()).toMatch(/Password must be at least 8 characters/i);
+  });
+
+  test('admin password change rejects passwords shorter than the shared minimum', async ({ page }) => {
+    const adminEmail = process.env.ADMIN_EMAIL || '';
+    const adminPassword = process.env.ADMIN_PASSWORD || '';
+    test.skip(adminEmail === '' || adminPassword === '', 'Set ADMIN_EMAIL and ADMIN_PASSWORD to exercise admin password policy.');
+
+    await loginWithCredentials(page, adminEmail, adminPassword);
+    await page.goto(new URL('admin pages/admin-settings.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const token = await csrfValue(page, 'form:has(input[name="action"][value="password"]) input[name="csrf_token"]');
+    const response = await page.request.post(new URL('admin pages/admin-settings.php', baseURL).toString(), {
+      form: {
+        csrf_token: token,
+        action: 'password',
+        current_password: adminPassword,
+        new_password: 'short7',
+        confirm_password: 'short7',
+      },
+    });
+
+    expect(response.status()).toBe(200);
+    expect(await response.text()).toMatch(/Password must be at least 8 characters/i);
   });
 });
 
