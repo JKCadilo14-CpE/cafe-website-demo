@@ -73,22 +73,7 @@ function settings_is_valid_recovery_phone(string $phone): bool
 
 function settings_destroy_current_session(): void
 {
-    $_SESSION = [];
-
-    if (ini_get('session.use_cookies')) {
-        $params = session_get_cookie_params();
-        setcookie(
-            session_name(),
-            '',
-            time() - 42000,
-            $params['path'],
-            $params['domain'],
-            (bool) $params['secure'],
-            (bool) $params['httponly']
-        );
-    }
-
-    session_destroy();
+    app_destroy_session();
 }
 
 $userId = (int) $_SESSION['user_id'];

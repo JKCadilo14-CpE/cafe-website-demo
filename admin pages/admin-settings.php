@@ -476,10 +476,13 @@ $avatarInitial = strtoupper(substr(trim((string) ($admin['username'] ?? 'A')) !=
                                         <h3>End Session</h3>
                                         <p>You can sign back in anytime with your admin email and password.</p>
                                     </div>
-                                    <a href="../logout.php" class="settings-action-button danger">
-                                        <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
-                                        Sign Out
-                                    </a>
+                                    <form action="../logout.php" method="post">
+                                        <?php echo app_csrf_field(); ?>
+                                        <button type="submit" class="settings-action-button danger">
+                                            <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                                            Sign Out
+                                        </button>
+                                    </form>
                                 </div>
                             </section>
                         </div>

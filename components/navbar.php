@@ -96,9 +96,12 @@ $profileImage = app_profile_image_src((string) ($_SESSION['profile_image'] ?? ''
                 </a>
               </div>
               <div class="account-popover-footer">
-                <a class="button button-secondary account-signout" href="logout.php">
-                  <span>Sign out</span>
-                </a>
+                <form action="logout.php" method="post">
+                  <?php echo app_csrf_field(); ?>
+                  <button class="button button-secondary account-signout" type="submit">
+                    <span>Sign out</span>
+                  </button>
+                </form>
               </div>
             </div>
           </div>

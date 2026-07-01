@@ -125,10 +125,13 @@ $adminProfileImageSrc = app_admin_asset_src($adminProfileImage);
                     <i class="fa-regular fa-moon"></i>
                     <span>Toggle Dark Mode</span>
                 </button>
-                <a href="../logout.php" class="more-dropdown-item logout-item" role="menuitem">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    <span>Logout</span>
-                </a>
+                <form action="../logout.php" method="post" role="none">
+                    <?php echo app_csrf_field(); ?>
+                    <button type="submit" class="more-dropdown-item logout-item" role="menuitem">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
             </div>
         </div>
     </div>

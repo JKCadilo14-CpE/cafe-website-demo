@@ -1,8 +1,100 @@
 <?php
 declare(strict_types=1);
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
+function app_is_https(): bool
+{
+    $https = strtolower((string) ($_SERVER['HTTPS'] ?? ''));
+
+    if ($https === 'on' || $https === '1') {
+        return true;
+    }
+
+    if ((string) ($_SERVER['SERVER_PORT'] ?? '') === '443') {
+        return true;
+    }
+
+    $forwardedProto = strtolower(trim(explode(',', (string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''))[0]));
+
+    if ($forwardedProto === 'https') {
+        return true;
+    }
+
+    $forwardedScheme = strtolower(trim((string) ($_SERVER['HTTP_X_FORWARDED_SCHEME'] ?? '')));
+
+    if ($forwardedScheme === 'https') {
+        return true;
+    }
+
+    $forwardedSsl = strtolower(trim((string) ($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '')));
+
+    return $forwardedSsl === 'on' || $forwardedSsl === '1';
+}
+
+function app_session_cookie_params(): array
+{
+    $params = session_get_cookie_params();
+
+    return [
+        'lifetime' => 0,
+        'path' => (string) ($params['path'] ?? '/'),
+        'domain' => (string) ($params['domain'] ?? ''),
+        'secure' => app_is_https(),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ];
+}
+
+function app_session_cookie_delete_options(): array
+{
+    $params = app_session_cookie_params();
+    $options = [
+        'expires' => time() - 42000,
+        'path' => $params['path'],
+        'secure' => $params['secure'],
+        'httponly' => $params['httponly'],
+        'samesite' => $params['samesite'],
+    ];
+
+    if ($params['domain'] !== '') {
+        $options['domain'] = $params['domain'];
+    }
+
+    return $options;
+}
+
+function app_send_security_headers(): void
+{
+    if (PHP_SAPI === 'cli' || headers_sent()) {
+        return;
+    }
+
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()');
+
+    if (app_is_https()) {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+    }
+}
+
+function app_start_session(): void
+{
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        return;
+    }
+
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    ini_set('session.use_trans_sid', '0');
+    session_set_cookie_params(app_session_cookie_params());
     session_start();
+}
+
+app_send_security_headers();
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    app_start_session();
 }
 
 const APP_DELIVERY_FEE = 60.00;
@@ -67,6 +159,19 @@ function app_require_csrf(): void
 
     if (!app_csrf_is_valid(is_string($token) ? $token : null)) {
         app_reject_csrf();
+    }
+}
+
+function app_destroy_session(): void
+{
+    $_SESSION = [];
+
+    if (ini_get('session.use_cookies')) {
+        setcookie(session_name(), '', app_session_cookie_delete_options());
+    }
+
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_destroy();
     }
 }
 

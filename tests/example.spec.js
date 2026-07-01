@@ -2,8 +2,50 @@
 import { test, expect } from '@playwright/test';
 
 const baseURL = process.env.BASE_URL || 'http://localhost/Project/';
+const baseOrigin = new URL(baseURL).origin;
+const isHttpsBaseUrl = new URL(baseURL).protocol === 'https:';
 
 test.describe.configure({ mode: 'serial' });
+
+function uniqueEmail(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}@example.com`;
+}
+
+async function csrfValue(page, selector = 'input[name="csrf_token"]') {
+  return page.locator(selector).first().inputValue();
+}
+
+async function signupTestUser(page) {
+  const email = uniqueEmail('phase2');
+  const password = 'TestPass123!';
+
+  await page.goto(new URL('signup.php', baseURL).toString(), {
+    waitUntil: 'domcontentloaded',
+  });
+  await page.getByLabel('Username').fill('Phase Two Tester');
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password', { exact: true }).fill(password);
+  await page.getByLabel('Confirm password').fill(password);
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await expect(page).toHaveURL(/profile\.php|cart\.php/);
+
+  return { email, password };
+}
+
+function expectSecurityHeaders(response) {
+  const headers = response.headers();
+
+  expect(headers['x-content-type-options']).toBe('nosniff');
+  expect(headers['x-frame-options']).toBe('DENY');
+  expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+  expect(headers['permissions-policy']).toBe('camera=(), microphone=(), geolocation=(), payment=()');
+
+  if (isHttpsBaseUrl) {
+    expect(headers['strict-transport-security']).toContain('max-age=31536000');
+  } else {
+    expect(headers['strict-transport-security']).toBeUndefined();
+  }
+}
 
 const publicPages = [
   {
@@ -59,6 +101,7 @@ for (const publicPage of publicPages) {
 
     expect(response, `${publicPage.path} should return a response`).not.toBeNull();
     expect(response?.ok(), `${publicPage.path} should load successfully`).toBe(true);
+    expectSecurityHeaders(response);
     await expect(page).toHaveTitle(publicPage.title);
     await expect(page.getByRole('heading', { name: publicPage.heading })).toBeVisible();
     expect(consoleErrors, `${publicPage.path} console errors`).toEqual([]);
@@ -111,5 +154,89 @@ test.describe('CSRF protection', () => {
 
     expect(response.status()).toBe(403);
     expect(await response.text()).toMatch(/Security check failed/i);
+  });
+});
+
+test.describe('Session and logout hardening', () => {
+  test('session cookie uses HttpOnly, SameSite=Lax, and environment-aware Secure', async ({ page }) => {
+    await page.goto(new URL('login.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const cookies = await page.context().cookies(baseOrigin);
+    const sessionCookie = cookies.find((cookie) => cookie.name === 'PHPSESSID' || cookie.name.toLowerCase().includes('sess'));
+
+    expect(sessionCookie, 'session cookie should be set').toBeTruthy();
+    expect(sessionCookie?.httpOnly).toBe(true);
+    expect(sessionCookie?.sameSite).toBe('Lax');
+    expect(sessionCookie?.secure).toBe(isHttpsBaseUrl);
+  });
+
+  test('logout requires POST and CSRF', async ({ page }) => {
+    await signupTestUser(page);
+
+    await page.goto(new URL('logout.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+    await page.goto(new URL('profile.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+    await expect(page.getByRole('heading', { name: /Welcome back/i })).toBeVisible();
+
+    const missingTokenResponse = await page.request.post(new URL('logout.php', baseURL).toString(), {
+      form: {},
+    });
+    expect(missingTokenResponse.status()).toBe(403);
+    expect(await missingTokenResponse.text()).toMatch(/Security check failed/i);
+
+    const invalidTokenResponse = await page.request.post(new URL('logout.php', baseURL).toString(), {
+      form: {
+        csrf_token: 'invalid-token',
+      },
+    });
+    expect(invalidTokenResponse.status()).toBe(403);
+    expect(await invalidTokenResponse.text()).toMatch(/Security check failed/i);
+
+    await page.goto(new URL('profile.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+    const token = await csrfValue(page, 'form[action="logout.php"] input[name="csrf_token"]');
+    const logoutResponse = await page.request.post(new URL('logout.php', baseURL).toString(), {
+      form: {
+        csrf_token: token,
+      },
+    });
+    expect(logoutResponse.ok()).toBe(true);
+
+    await page.goto(new URL('profile.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+    await expect(page).toHaveURL(/login\.php/);
+  });
+
+  test('customer navbar renders POST logout form with CSRF token', async ({ page }) => {
+    await signupTestUser(page);
+    await page.goto(new URL('profile.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const logoutForm = page.locator('form[action="logout.php"][method="post"]');
+    await expect(logoutForm).toHaveCount(1);
+    await expect(logoutForm.locator('input[name="csrf_token"]')).not.toHaveValue('');
+  });
+});
+
+test.describe('Security headers on JSON endpoints', () => {
+  test('order status endpoint keeps JSON response with hardening headers', async ({ request }) => {
+    const response = await request.get(new URL('order-status.php?id=1', baseURL).toString(), {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    expect(response.status()).toBe(401);
+    expect(response.headers()['content-type']).toContain('application/json');
+    expectSecurityHeaders(response);
+    expect(await response.json()).toHaveProperty('error');
   });
 });
