@@ -18,6 +18,8 @@ if (app_is_logged_in()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_require_csrf();
+
     $password = (string) ($_POST['password'] ?? '');
 
     if ($email === '' || $password === '') {
@@ -120,6 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form class="login-form" action="login.php" method="post" data-auth-form>
+          <?php echo app_csrf_field(); ?>
           <input type="hidden" name="redirect" value="<?php echo e($redirect); ?>">
 
           <div class="login-form-intro" aria-label="Sign in benefits">

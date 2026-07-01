@@ -84,6 +84,8 @@ try {
     app_ensure_profile_image_column($mysqli);
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        app_require_csrf();
+
         $action = (string) ($_POST['action'] ?? '');
 
         if ($action === 'profile_image') {
@@ -339,6 +341,7 @@ $avatarInitial = strtoupper(substr(trim((string) ($admin['username'] ?? 'A')) !=
                             </div>
 
                             <form class="settings-form settings-upload-form" action="admin-settings.php#settings-photo" method="POST" enctype="multipart/form-data">
+                                <?php echo app_csrf_field(); ?>
                                 <input type="hidden" name="action" value="profile_image">
                                 <label class="settings-file-drop" for="admin-profile-image">
                                     <span class="settings-file-icon" aria-hidden="true">
@@ -356,6 +359,7 @@ $avatarInitial = strtoupper(substr(trim((string) ($admin['username'] ?? 'A')) !=
 
                             <?php if ($profileImageSrc !== ''): ?>
                                 <form class="settings-remove-photo-form" action="admin-settings.php#settings-photo" method="POST">
+                                    <?php echo app_csrf_field(); ?>
                                     <input type="hidden" name="action" value="remove_profile_image">
                                     <button type="submit" class="settings-action-button secondary settings-remove-photo">
                                         <i class="fa-solid fa-trash" aria-hidden="true"></i>
@@ -375,6 +379,7 @@ $avatarInitial = strtoupper(substr(trim((string) ($admin['username'] ?? 'A')) !=
                                 <p>These details appear inside the admin dashboard and help the team know who made changes.</p>
                             </div>
                             <form class="settings-form" action="admin-settings.php" method="POST">
+                                <?php echo app_csrf_field(); ?>
                                 <input type="hidden" name="action" value="account">
                                 <div class="form-field">
                                     <label for="username">Username</label>
@@ -403,6 +408,7 @@ $avatarInitial = strtoupper(substr(trim((string) ($admin['username'] ?? 'A')) !=
                                 <p>Refresh access when devices change hands or after a busy admin session.</p>
                             </div>
                             <form class="settings-form" action="admin-settings.php" method="POST">
+                                <?php echo app_csrf_field(); ?>
                                 <input type="hidden" name="action" value="password">
                                 <div class="form-field">
                                     <label for="current_password">Current Password</label>

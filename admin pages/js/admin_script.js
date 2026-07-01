@@ -236,6 +236,8 @@ const setupSearch = () => {
 
 const setupNotificationCount = async () => {
     const notificationButton = document.querySelector('.topbar-actions .icon-button[aria-label="Notifications"]');
+    const topbar = document.querySelector('.topbar');
+    const csrfToken = topbar?.dataset.csrfToken || '';
 
     if (!notificationButton) {
         return;
@@ -416,6 +418,7 @@ const setupNotificationCount = async () => {
             formData.append('action', 'mark_read');
             formData.append('type', notificationType);
             formData.append(notificationType === 'contact_message' ? 'message_id' : 'order_id', String(notificationId));
+            formData.append('csrf_token', csrfToken);
 
             await fetch('admin_notifications.php', {
                 method: 'POST',

@@ -4,6 +4,8 @@ require_once __DIR__ . '/components/app.php';
 $isLoggedIn = app_is_logged_in();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string) ($_POST['action'] ?? '') === 'product_reminder') {
+    app_require_csrf();
+
     $reminderResult = 'login_required';
 
     if ($isLoggedIn) {
@@ -256,6 +258,7 @@ if (isset($_GET['reminder'])) {
                 <div class="product-card-footer">
                   <strong><?php echo $isOrderable ? e(app_format_money((float) $product['price'])) : 'Price unavailable'; ?></strong>
                   <form action="cart.php" method="post">
+                    <?php echo app_csrf_field(); ?>
                     <input type="hidden" name="action" value="add">
                     <input type="hidden" name="product_id" value="<?php echo e((string) $productId); ?>">
                     <input type="hidden" name="quantity" value="1">
@@ -270,6 +273,7 @@ if (isset($_GET['reminder'])) {
                         <button type="button" disabled>Reminder set</button>
                       <?php else: ?>
                         <form action="menu.php" method="post">
+                          <?php echo app_csrf_field(); ?>
                           <input type="hidden" name="action" value="product_reminder">
                           <input type="hidden" name="product_id" value="<?php echo e((string) $productId); ?>">
                           <button type="submit">Notify me when available</button>

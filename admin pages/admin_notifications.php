@@ -28,6 +28,8 @@ try {
     app_ensure_contact_messages_table($mysqli);
 
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+        app_require_csrf();
+
         $action = (string) ($_POST['action'] ?? '');
         $type = (string) ($_POST['type'] ?? 'order');
 

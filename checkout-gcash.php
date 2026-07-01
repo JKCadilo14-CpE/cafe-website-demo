@@ -14,6 +14,8 @@ if (app_cart_count() < 1) {
 $_SESSION['checkout_payment_method'] = 'gcash';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_require_csrf();
+
     $_SESSION['checkout_payment_confirmed'] = true;
     header('Location: checkout-address.php');
     exit();
@@ -81,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="checkout-qr-actions">
           <a class="button button-secondary" href="cart.php">Back to cart</a>
           <form action="checkout-gcash.php" method="post">
+            <?php echo app_csrf_field(); ?>
             <button class="button button-primary" type="submit">I have paid</button>
           </form>
         </div>

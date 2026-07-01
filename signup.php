@@ -15,6 +15,8 @@ if (app_is_logged_in()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_require_csrf();
+
     $password = (string) ($_POST['password'] ?? '');
     $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
 
@@ -117,6 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form class="login-form" action="signup.php" method="post" data-auth-form>
+          <?php echo app_csrf_field(); ?>
           <input type="hidden" name="redirect" value="<?php echo e($redirect); ?>">
 
           <div class="login-form-intro signup-form-intro" aria-label="Signup benefits">

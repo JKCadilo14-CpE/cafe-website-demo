@@ -7,6 +7,8 @@ $message = '';
 $messageType = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_require_csrf();
+
     $action = (string) ($_POST['action'] ?? '');
     $productId = filter_input(INPUT_POST, 'product_id', FILTER_VALIDATE_INT) ?: 0;
 
@@ -147,6 +149,7 @@ $isLoggedIn = app_is_logged_in();
                 <p><?php echo e(app_format_money((float) $item['price'])); ?> each · prepared fresh for pickup or delivery.</p>
               </div>
               <form class="cart-quantity" action="cart.php" method="post">
+                <?php echo app_csrf_field(); ?>
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="product_id" value="<?php echo e((string) $item['id']); ?>">
                 <label for="quantity-<?php echo e((string) $item['id']); ?>">Qty</label>
@@ -156,6 +159,7 @@ $isLoggedIn = app_is_logged_in();
               <div class="cart-item-total">
                 <strong><?php echo e(app_format_money((float) $item['line_total'])); ?></strong>
                 <form action="cart.php" method="post">
+                  <?php echo app_csrf_field(); ?>
                   <input type="hidden" name="action" value="remove">
                   <input type="hidden" name="product_id" value="<?php echo e((string) $item['id']); ?>">
                   <button type="submit">Remove</button>
@@ -188,6 +192,7 @@ $isLoggedIn = app_is_logged_in();
         </dl>
 
         <form class="checkout-form" action="cart.php" method="post">
+          <?php echo app_csrf_field(); ?>
           <input type="hidden" name="action" value="checkout">
           <fieldset>
             <legend>Payment method</legend>

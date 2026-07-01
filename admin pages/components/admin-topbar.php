@@ -57,7 +57,7 @@ $adminSearchTargets = (string) ($adminSearchTargets ?? ($adminSearchTargetsMap[$
 $adminProfileImage = app_profile_image_src((string) ($_SESSION['profile_image'] ?? ''));
 $adminProfileImageSrc = app_admin_asset_src($adminProfileImage);
 ?>
-<header class="topbar" aria-label="Admin toolbar">
+<header class="topbar" aria-label="Admin toolbar" data-csrf-token="<?php echo e(app_csrf_token()); ?>">
     <button type="button" class="icon-button sidebar-toggle" aria-label="Open admin navigation" aria-expanded="false" aria-controls="adminSidebar" data-admin-sidebar-toggle>
         <i class="fa-solid fa-bars" aria-hidden="true"></i>
     </button>

@@ -18,6 +18,8 @@ if (isset($_GET['sent'])) {
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    app_require_csrf();
+
     $contactValues = [
         'name' => trim((string) ($_POST['name'] ?? '')),
         'email' => trim((string) ($_POST['email'] ?? '')),
@@ -167,6 +169,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         </p>
 
         <form class="contact-form" id="contact-form" action="contact.php#contact-form" method="post">
+          <?php echo app_csrf_field(); ?>
           <div class="contact-form-intro form-row-full" aria-label="Message response details">
             <span>What happens next</span>
             <p>Messages go to the cafe team. If a field needs fixing, we will keep your note here so you do not have to start over.</p>

@@ -17,6 +17,8 @@ try {
     $mysqli = app_db();
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        app_require_csrf();
+
         $name = trim((string) ($_POST['name'] ?? ''));
         $category = trim((string) ($_POST['category'] ?? ''));
         $priceInput = trim((string) ($_POST['price'] ?? ''));
@@ -125,6 +127,7 @@ try {
 
                         <div class="add-product-content">
                             <form class="add-product-form add-product-form-card" action="admin-add-product.php" method="POST" enctype="multipart/form-data">
+                                <?php echo app_csrf_field(); ?>
                                 <div class="form-section-heading">
                                     <span class="form-section-icon" aria-hidden="true">
                                         <i class="fa-solid fa-pen-nib"></i>

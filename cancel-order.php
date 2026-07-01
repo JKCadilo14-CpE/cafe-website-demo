@@ -27,6 +27,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     cancel_order_respond(['error' => 'Invalid request method.'], 405);
 }
 
+app_require_csrf();
+
 $orderId = filter_input(INPUT_POST, 'order_id', FILTER_VALIDATE_INT);
 
 if ($orderId === false || $orderId === null || $orderId < 1) {

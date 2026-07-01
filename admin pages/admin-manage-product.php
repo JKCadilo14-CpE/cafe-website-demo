@@ -33,6 +33,8 @@ try {
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
+        app_require_csrf();
+
         $productId = filter_input(INPUT_POST, 'product_id', FILTER_VALIDATE_INT);
 
         if ($productId !== false && $productId !== null) {
@@ -318,6 +320,7 @@ try {
                                                         Edit
                                                     </a>
                                                     <form action="admin-manage-product.php" method="POST" onsubmit="return confirm('Delete this product from the database?');">
+                                                        <?php echo app_csrf_field(); ?>
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="product_id" value="<?php echo $productId; ?>">
                                                         <button type="submit" class="product-action-button delete" aria-label="Delete <?php echo e($productName); ?>">

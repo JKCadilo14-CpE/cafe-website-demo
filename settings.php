@@ -144,6 +144,8 @@ try {
         $_SESSION['profile_image'] = app_profile_image_src($account['profile_image']);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            app_require_csrf();
+
             $action = (string) ($_POST['action'] ?? '');
 
             if ($action === 'profile_image') {
@@ -476,6 +478,7 @@ $initials = app_initials($displayName);
           </div>
 
           <form class="settings-upload-form" action="settings.php#settings-photo" method="post" enctype="multipart/form-data">
+            <?php echo app_csrf_field(); ?>
             <input type="hidden" name="action" value="profile_image">
             <label class="settings-file-drop" for="profile-image">
               <span class="settings-file-icon"><i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i></span>
@@ -488,6 +491,7 @@ $initials = app_initials($displayName);
 
           <?php if ($profileImage !== ''): ?>
             <form action="settings.php#settings-photo" method="post">
+              <?php echo app_csrf_field(); ?>
               <input type="hidden" name="action" value="remove_profile_image">
               <button class="button button-secondary settings-remove-photo" type="submit"><i class="fa-solid fa-trash" aria-hidden="true"></i> Remove photo</button>
             </form>
@@ -509,6 +513,7 @@ $initials = app_initials($displayName);
           </div>
 
           <form class="login-form" action="settings.php#settings-display-name" method="post">
+            <?php echo app_csrf_field(); ?>
             <input type="hidden" name="action" value="username">
             <div class="login-field" data-input-glow>
               <label for="settings-username">Username</label>
@@ -534,6 +539,7 @@ $initials = app_initials($displayName);
           </div>
 
           <form class="login-form settings-recovery-form" action="settings.php#settings-recovery" method="post">
+            <?php echo app_csrf_field(); ?>
             <input type="hidden" name="action" value="recovery_contact">
 
             <div class="settings-recovery-grid">
@@ -580,6 +586,7 @@ $initials = app_initials($displayName);
           </div>
 
           <form class="login-form" action="settings.php#settings-password" method="post">
+            <?php echo app_csrf_field(); ?>
             <input type="hidden" name="action" value="password">
 
             <div class="login-field" data-input-glow>
@@ -640,6 +647,7 @@ $initials = app_initials($displayName);
           </div>
 
           <form class="login-form settings-delete-form" action="settings.php#settings-danger" method="post">
+            <?php echo app_csrf_field(); ?>
             <input type="hidden" name="action" value="delete_account">
 
             <div class="login-field" data-input-glow>

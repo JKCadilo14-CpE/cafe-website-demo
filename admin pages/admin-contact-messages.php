@@ -10,6 +10,8 @@ $message = '';
 $messageType = '';
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    app_require_csrf();
+
     $action = (string) ($_POST['action'] ?? '');
     $messageId = filter_input(INPUT_POST, 'message_id', FILTER_VALIDATE_INT);
 
@@ -197,6 +199,7 @@ $latestReceived = $messages !== [] ? (string) ($messages[0]['created_at'] ?? 'No
                                         </div>
                                         <?php if ($selectedIsUnread): ?>
                                             <form class="contact-message-actions" action="admin-contact-messages.php" method="post">
+                                                <?php echo app_csrf_field(); ?>
                                                 <input type="hidden" name="action" value="mark_read">
                                                 <input type="hidden" name="message_id" value="<?php echo (int) ($selectedMessage['id'] ?? 0); ?>">
                                                 <button type="submit" class="contact-message-read-button">

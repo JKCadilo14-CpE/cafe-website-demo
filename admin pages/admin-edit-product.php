@@ -37,6 +37,8 @@ if ($productId === false || $productId === null) {
             $message = 'Product not found. It may have been deleted already.';
             $messageType = 'error';
         } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            app_require_csrf();
+
             $previousStatus = app_normalize_product_status((string) ($product['status'] ?? 'available'));
             $name = trim((string) ($_POST['name'] ?? ''));
             $category = trim((string) ($_POST['category'] ?? ''));
@@ -173,6 +175,7 @@ if ($productId === false || $productId === null) {
                             <?php $previewPrice = (string) ($product['price'] ?? '') !== '' && is_numeric((string) $product['price']) ? 'PHP ' . number_format((float) $product['price'], 2) : 'Price not set'; ?>
                             <div class="edit-product-content">
                                 <form class="edit-product-form edit-product-form-card" action="admin-edit-product.php?id=<?php echo (int) $product['id']; ?>" method="POST" enctype="multipart/form-data">
+                                    <?php echo app_csrf_field(); ?>
                                     <div class="form-section-heading">
                                         <span class="form-section-icon" aria-hidden="true">
                                             <i class="fa-solid fa-pen-nib"></i>

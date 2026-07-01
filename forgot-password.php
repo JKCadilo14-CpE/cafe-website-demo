@@ -13,6 +13,8 @@ function forgot_password_valid_phone(string $phone): bool
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_require_csrf();
+
     if ($accountEmail === '') {
         $message = 'Please enter your account email.';
         $messageType = 'error';
@@ -82,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form class="login-form" action="forgot-password.php" method="post" data-auth-form>
+          <?php echo app_csrf_field(); ?>
           <div class="login-form-intro" aria-label="Recovery demo notice">
             <span>Demo recovery</span>
             <p>For privacy, the response stays the same whether an account exists or not.</p>

@@ -274,6 +274,7 @@ $statusCopy = match ($currentStatus) {
               data-order-cancel-form
               <?php echo $canCancel ? '' : 'hidden'; ?>
             >
+              <?php echo app_csrf_field(); ?>
               <input type="hidden" name="order_id" value="<?php echo e((string) $order['id']); ?>">
               <button class="button button-secondary order-cancel-button" type="submit" data-order-cancel-button>
                 Cancel order

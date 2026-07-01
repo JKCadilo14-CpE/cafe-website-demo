@@ -24,6 +24,8 @@ $checkoutValues = [
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_require_csrf();
+
     $checkoutValues = [
         'customer_name' => trim((string) ($_POST['customer_name'] ?? '')),
         'phone_number' => trim((string) ($_POST['phone_number'] ?? '')),
@@ -162,6 +164,7 @@ $paymentLabel = match ($paymentMethod) {
         <?php endif; ?>
 
         <form class="checkout-details-form" action="checkout-address.php" method="post">
+          <?php echo app_csrf_field(); ?>
           <div class="form-row">
             <label for="customer-name">Name</label>
             <input id="customer-name" name="customer_name" type="text" autocomplete="name" maxlength="100" value="<?php echo e($checkoutValues['customer_name']); ?>" required data-input-glow>

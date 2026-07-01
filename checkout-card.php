@@ -14,6 +14,8 @@ if (app_cart_count() < 1) {
 $_SESSION['checkout_payment_method'] = 'card';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_require_csrf();
+
     $_SESSION['checkout_payment_confirmed'] = true;
     header('Location: checkout-address.php');
     exit();
@@ -66,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <form class="checkout-details-form" action="checkout-card.php" method="post">
+          <?php echo app_csrf_field(); ?>
           <div class="form-row form-row-full">
             <label for="card-name">Name on card</label>
             <input id="card-name" name="card_name" type="text" autocomplete="cc-name" maxlength="100" required data-input-glow>

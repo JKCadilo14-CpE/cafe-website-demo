@@ -34,6 +34,8 @@ if ($orderId === false || $orderId === null || $orderId < 1) {
         $mysqli = app_db();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            app_require_csrf();
+
             $action = (string) ($_POST['action'] ?? '');
             $newStatus = $action === 'cancel' ? 'Cancelled' : trim((string) ($_POST['status'] ?? ''));
 
@@ -295,6 +297,7 @@ $currentStatusIndex = $currentStatusIndex === false ? 0 : (int) $currentStatusIn
                                     <h2>Actions</h2>
                                 </div>
                                 <form class="order-actions-form" action="admin-order-details.php?id=<?php echo (int) $order['id']; ?>" method="POST">
+                                    <?php echo app_csrf_field(); ?>
                                     <select class="order-status-select" name="status" aria-label="Update order status">
                                         <?php foreach ($statusOptions as $statusOption): ?>
                                             <option value="<?php echo e($statusOption); ?>" <?php echo $currentStatus === $statusOption ? 'selected' : ''; ?>>

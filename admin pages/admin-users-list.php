@@ -27,6 +27,8 @@ try {
     $mysqli = app_db();
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        app_require_csrf();
+
         $action = (string) ($_POST['action'] ?? '');
         $userId = filter_input(INPUT_POST, 'user_id', FILTER_VALIDATE_INT);
 
@@ -233,6 +235,7 @@ try {
                                             <td>
                                                 <div class="user-action-group">
                                                     <form class="role-form" action="admin-users-list.php" method="POST">
+                                                        <?php echo app_csrf_field(); ?>
                                                         <input type="hidden" name="action" value="update_role">
                                                         <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
                                                         <select class="role-select" name="role" aria-label="Change role for <?php echo htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8'); ?>">
@@ -249,6 +252,7 @@ try {
                                                     </form>
 
                                                     <form class="delete-user-form" action="admin-users-list.php" method="POST" onsubmit="return confirm('Permanently delete <?php echo htmlspecialchars(addslashes((string) $user['username']), ENT_QUOTES, 'UTF-8'); ?>? Active orders will be cancelled and the account cannot be restored.');">
+                                                        <?php echo app_csrf_field(); ?>
                                                         <input type="hidden" name="action" value="delete_user">
                                                         <input type="hidden" name="user_id" value="<?php echo $userId; ?>">
                                                         <button type="submit" class="delete-user-button" <?php echo $userId === (int) ($_SESSION['user_id'] ?? 0) ? 'disabled aria-disabled="true"' : ''; ?>>
