@@ -214,11 +214,16 @@ try {
                 $newPassword = (string) ($_POST['new_password'] ?? '');
                 $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
                 $passwordErrors = app_validate_password($newPassword);
+                $passwordRateLimit = app_rate_limit_check('customer_password_change', 5, 600, 600);
 
-                if ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
+                if (!$passwordRateLimit['allowed']) {
+                    $message = app_rate_limit_message($passwordRateLimit, 'password change attempts');
+                    $messageType = 'error';
+                } elseif ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
                     $message = 'Please complete all password fields.';
                     $messageType = 'error';
                 } elseif (!password_verify($currentPassword, $account['password'])) {
+                    app_rate_limit_hit('customer_password_change', 5, 600, 600);
                     $message = 'Current password is incorrect.';
                     $messageType = 'error';
                 } elseif ($passwordErrors !== []) {
@@ -234,6 +239,7 @@ try {
                     $passwordStatement->execute();
                     $passwordStatement->close();
 
+                    app_rate_limit_clear('customer_password_change');
                     $message = 'Password updated successfully.';
                     $messageType = 'success';
                 }

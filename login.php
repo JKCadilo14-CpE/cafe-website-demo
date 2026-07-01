@@ -21,8 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     app_require_csrf();
 
     $password = (string) ($_POST['password'] ?? '');
+    $loginRateLimit = app_rate_limit_check('login', 5, 600, 600);
 
-    if ($email === '' || $password === '') {
+    if (!$loginRateLimit['allowed']) {
+        $message = app_rate_limit_message($loginRateLimit, 'login attempts');
+        $messageType = 'error';
+    } elseif ($email === '' || $password === '') {
         $message = 'Please enter your email and password.';
         $messageType = 'error';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -45,9 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $accountStatus = trim((string) ($user['account_status'] ?? 'active'));
 
                 if ($accountStatus !== '' && strcasecmp($accountStatus, 'deleted') === 0) {
+                    app_rate_limit_hit('login', 5, 600, 600);
                     $message = 'This account is no longer available.';
                     $messageType = 'error';
                 } else {
+                    app_rate_limit_clear('login');
                     session_regenerate_id(true);
                     $_SESSION['user_id'] = (int) $user['id'];
                     $_SESSION['username'] = (string) $user['username'];
@@ -66,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if ($message === '') {
+                app_rate_limit_hit('login', 5, 600, 600);
                 $message = 'Invalid email or password.';
                 $messageType = 'error';
             }

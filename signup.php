@@ -34,45 +34,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = 'Passwords do not match.';
         $messageType = 'error';
     } else {
-        try {
-            $mysqli = app_db();
-            app_ensure_profile_image_column($mysqli);
-            $checkStatement = $mysqli->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
-            $checkStatement->bind_param('s', $email);
-            $checkStatement->execute();
-            $result = $checkStatement->get_result();
-            $existingUser = $result->fetch_assoc();
-            $result->free();
-            $checkStatement->close();
+        $signupRateLimit = app_rate_limit_check('signup', 3, 600, 900);
 
-            if ($existingUser !== null) {
-                $message = 'An account with this email already exists.';
-                $messageType = 'error';
-            } else {
-                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                $role = 0;
-                $insertStatement = $mysqli->prepare('INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)');
-                $insertStatement->bind_param('sssi', $username, $email, $hashedPassword, $role);
-                $insertStatement->execute();
-                $userId = (int) $mysqli->insert_id;
-                $insertStatement->close();
-                $mysqli->close();
-
-                session_regenerate_id(true);
-                $_SESSION['user_id'] = $userId;
-                $_SESSION['username'] = $username;
-                $_SESSION['email'] = $email;
-                $_SESSION['role'] = $role;
-                $_SESSION['profile_image'] = '';
-
-                header('Location: ' . $redirectTarget);
-                exit();
-            }
-
-            $mysqli->close();
-        } catch (mysqli_sql_exception $exception) {
-            $message = 'Unable to create your account right now. Please check the database connection.';
+        if (!$signupRateLimit['allowed']) {
+            $message = app_rate_limit_message($signupRateLimit, 'signup attempts');
             $messageType = 'error';
+        } else {
+            app_rate_limit_hit('signup', 3, 600, 900);
+
+            try {
+                $mysqli = app_db();
+                app_ensure_profile_image_column($mysqli);
+                $checkStatement = $mysqli->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
+                $checkStatement->bind_param('s', $email);
+                $checkStatement->execute();
+                $result = $checkStatement->get_result();
+                $existingUser = $result->fetch_assoc();
+                $result->free();
+                $checkStatement->close();
+
+                if ($existingUser !== null) {
+                    $message = 'An account with this email already exists.';
+                    $messageType = 'error';
+                } else {
+                    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                    $role = 0;
+                    $insertStatement = $mysqli->prepare('INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)');
+                    $insertStatement->bind_param('sssi', $username, $email, $hashedPassword, $role);
+                    $insertStatement->execute();
+                    $userId = (int) $mysqli->insert_id;
+                    $insertStatement->close();
+                    $mysqli->close();
+
+                    app_rate_limit_clear('signup');
+                    session_regenerate_id(true);
+                    $_SESSION['user_id'] = $userId;
+                    $_SESSION['username'] = $username;
+                    $_SESSION['email'] = $email;
+                    $_SESSION['role'] = $role;
+                    $_SESSION['profile_image'] = '';
+
+                    header('Location: ' . $redirectTarget);
+                    exit();
+                }
+
+                $mysqli->close();
+            } catch (mysqli_sql_exception $exception) {
+                $message = 'Unable to create your account right now. Please check the database connection.';
+                $messageType = 'error';
+            }
         }
     }
 }

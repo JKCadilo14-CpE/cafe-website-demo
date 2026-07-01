@@ -129,6 +129,84 @@ function app_password_policy_text(): string
     return 'Use at least ' . app_password_min_length() . ' characters.';
 }
 
+function app_rate_limit_store(): array
+{
+    if (!isset($_SESSION['app_rate_limits']) || !is_array($_SESSION['app_rate_limits'])) {
+        $_SESSION['app_rate_limits'] = [];
+    }
+
+    return $_SESSION['app_rate_limits'];
+}
+
+function app_rate_limit_check(string $bucket, int $maxAttempts, int $windowSeconds, int $cooldownSeconds): array
+{
+    app_rate_limit_store();
+
+    $now = time();
+    $windowStart = $now - max(1, $windowSeconds);
+    $state = $_SESSION['app_rate_limits'][$bucket] ?? [];
+    $attempts = is_array($state['attempts'] ?? null) ? $state['attempts'] : [];
+    $attempts = array_values(array_filter($attempts, static function ($attempt) use ($windowStart): bool {
+        return is_int($attempt) && $attempt >= $windowStart;
+    }));
+    $blockedUntil = (int) ($state['blocked_until'] ?? 0);
+
+    if ($blockedUntil <= $now) {
+        $blockedUntil = 0;
+    }
+
+    $_SESSION['app_rate_limits'][$bucket] = [
+        'attempts' => $attempts,
+        'blocked_until' => $blockedUntil,
+    ];
+
+    $retryAfter = $blockedUntil > $now ? $blockedUntil - $now : 0;
+
+    return [
+        'allowed' => $retryAfter === 0,
+        'attempts' => count($attempts),
+        'remaining' => max(0, $maxAttempts - count($attempts)),
+        'retry_after' => $retryAfter,
+        'blocked_until' => $blockedUntil,
+        'window_seconds' => $windowSeconds,
+        'cooldown_seconds' => $cooldownSeconds,
+    ];
+}
+
+function app_rate_limit_hit(string $bucket, int $maxAttempts, int $windowSeconds, int $cooldownSeconds): array
+{
+    $state = app_rate_limit_check($bucket, $maxAttempts, $windowSeconds, $cooldownSeconds);
+
+    if (!$state['allowed']) {
+        return $state;
+    }
+
+    $now = time();
+    $_SESSION['app_rate_limits'][$bucket]['attempts'][] = $now;
+
+    if (count($_SESSION['app_rate_limits'][$bucket]['attempts']) >= $maxAttempts) {
+        $_SESSION['app_rate_limits'][$bucket]['blocked_until'] = $now + max(1, $cooldownSeconds);
+    }
+
+    return app_rate_limit_check($bucket, $maxAttempts, $windowSeconds, $cooldownSeconds);
+}
+
+function app_rate_limit_clear(string $bucket): void
+{
+    if (isset($_SESSION['app_rate_limits']) && is_array($_SESSION['app_rate_limits'])) {
+        unset($_SESSION['app_rate_limits'][$bucket]);
+    }
+}
+
+function app_rate_limit_message(array $state, string $label = 'attempts'): string
+{
+    $retryAfter = max(1, (int) ($state['retry_after'] ?? $state['cooldown_seconds'] ?? 60));
+    $minutes = max(1, (int) ceil($retryAfter / 60));
+    $unit = $minutes === 1 ? 'minute' : 'minutes';
+
+    return 'Too many ' . $label . '. Please wait about ' . $minutes . ' ' . $unit . ' and try again.';
+}
+
 function app_csrf_token(): string
 {
     if (!isset($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token']) || $_SESSION['csrf_token'] === '') {

@@ -20,55 +20,64 @@ if (isset($_GET['sent'])) {
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     app_require_csrf();
 
-    $contactValues = [
-        'name' => trim((string) ($_POST['name'] ?? '')),
-        'email' => trim((string) ($_POST['email'] ?? '')),
-        'topic' => trim((string) ($_POST['topic'] ?? '')),
-        'message' => trim((string) ($_POST['message'] ?? '')),
-    ];
+    $contactRateLimit = app_rate_limit_check('contact', 3, 600, 600);
 
-    if ($contactValues['name'] === '') {
-        $contactErrors['name'] = 'Enter your name.';
-    } elseif (strlen($contactValues['name']) > 100) {
-        $contactErrors['name'] = 'Keep your name under 100 characters.';
-    }
+    if (!$contactRateLimit['allowed']) {
+        $contactStatus = app_rate_limit_message($contactRateLimit, 'contact submissions');
+        $contactStatusType = 'error';
+    } else {
+        $contactValues = [
+            'name' => trim((string) ($_POST['name'] ?? '')),
+            'email' => trim((string) ($_POST['email'] ?? '')),
+            'topic' => trim((string) ($_POST['topic'] ?? '')),
+            'message' => trim((string) ($_POST['message'] ?? '')),
+        ];
 
-    if ($contactValues['email'] === '') {
-        $contactErrors['email'] = 'Enter your email address.';
-    } elseif (!filter_var($contactValues['email'], FILTER_VALIDATE_EMAIL)) {
-        $contactErrors['email'] = 'Enter a valid email address.';
-    } elseif (strlen($contactValues['email']) > 150) {
-        $contactErrors['email'] = 'Keep your email under 150 characters.';
-    }
+        if ($contactValues['name'] === '') {
+            $contactErrors['name'] = 'Enter your name.';
+        } elseif (strlen($contactValues['name']) > 100) {
+            $contactErrors['name'] = 'Keep your name under 100 characters.';
+        }
 
-    if ($contactValues['topic'] === '' || !array_key_exists($contactValues['topic'], $contactTopics)) {
-        $contactErrors['topic'] = 'Choose a topic.';
-    }
+        if ($contactValues['email'] === '') {
+            $contactErrors['email'] = 'Enter your email address.';
+        } elseif (!filter_var($contactValues['email'], FILTER_VALIDATE_EMAIL)) {
+            $contactErrors['email'] = 'Enter a valid email address.';
+        } elseif (strlen($contactValues['email']) > 150) {
+            $contactErrors['email'] = 'Keep your email under 150 characters.';
+        }
 
-    if ($contactValues['message'] === '') {
-        $contactErrors['message'] = 'Write a short message.';
-    } elseif (strlen($contactValues['message']) > 2000) {
-        $contactErrors['message'] = 'Keep your message under 2000 characters.';
-    }
+        if ($contactValues['topic'] === '' || !array_key_exists($contactValues['topic'], $contactTopics)) {
+            $contactErrors['topic'] = 'Choose a topic.';
+        }
 
-    if ($contactErrors === []) {
-        try {
-            app_create_contact_message(
-                $contactValues['name'],
-                $contactValues['email'],
-                $contactValues['topic'],
-                $contactValues['message']
-            );
+        if ($contactValues['message'] === '') {
+            $contactErrors['message'] = 'Write a short message.';
+        } elseif (strlen($contactValues['message']) > 2000) {
+            $contactErrors['message'] = 'Keep your message under 2000 characters.';
+        }
 
-            header('Location: contact.php?sent=1#contact-form');
-            exit;
-        } catch (mysqli_sql_exception $exception) {
-            $contactStatus = 'We could not save your message right now. Please try again in a moment.';
+        if ($contactErrors === []) {
+            app_rate_limit_hit('contact', 3, 600, 600);
+
+            try {
+                app_create_contact_message(
+                    $contactValues['name'],
+                    $contactValues['email'],
+                    $contactValues['topic'],
+                    $contactValues['message']
+                );
+
+                header('Location: contact.php?sent=1#contact-form');
+                exit;
+            } catch (mysqli_sql_exception $exception) {
+                $contactStatus = 'We could not save your message right now. Please try again in a moment.';
+                $contactStatusType = 'error';
+            }
+        } else {
+            $contactStatus = 'Please check the highlighted fields.';
             $contactStatusType = 'error';
         }
-    } else {
-        $contactStatus = 'Please check the highlighted fields.';
-        $contactStatusType = 'error';
     }
 }
 ?>

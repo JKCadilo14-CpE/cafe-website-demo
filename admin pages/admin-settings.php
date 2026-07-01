@@ -171,31 +171,39 @@ try {
             $newPassword = (string) ($_POST['new_password'] ?? '');
             $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
             $passwordErrors = app_validate_password($newPassword);
+            $passwordRateLimit = app_rate_limit_check('admin_password_change', 3, 600, 900);
 
-            $passwordStatement = $mysqli->prepare('SELECT password FROM users WHERE id = ? LIMIT 1');
-            $passwordStatement->bind_param('i', $admin['id']);
-            $passwordStatement->execute();
-            $passwordRow = $passwordStatement->get_result()->fetch_assoc();
-            $passwordStatement->close();
-
-            if ($passwordRow === null || !password_verify($currentPassword, (string) $passwordRow['password'])) {
-                $message = 'Current password is incorrect.';
-                $messageType = 'error';
-            } elseif ($passwordErrors !== []) {
-                $message = $passwordErrors[0];
-                $messageType = 'error';
-            } elseif ($newPassword !== $confirmPassword) {
-                $message = 'New password and confirmation do not match.';
+            if (!$passwordRateLimit['allowed']) {
+                $message = app_rate_limit_message($passwordRateLimit, 'password change attempts');
                 $messageType = 'error';
             } else {
-                $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
-                $updatePasswordStatement = $mysqli->prepare('UPDATE users SET password = ? WHERE id = ?');
-                $updatePasswordStatement->bind_param('si', $passwordHash, $admin['id']);
-                $updatePasswordStatement->execute();
-                $updatePasswordStatement->close();
+                $passwordStatement = $mysqli->prepare('SELECT password FROM users WHERE id = ? LIMIT 1');
+                $passwordStatement->bind_param('i', $admin['id']);
+                $passwordStatement->execute();
+                $passwordRow = $passwordStatement->get_result()->fetch_assoc();
+                $passwordStatement->close();
 
-                header('Location: admin-settings.php?updated=password');
-                exit();
+                if ($passwordRow === null || !password_verify($currentPassword, (string) $passwordRow['password'])) {
+                    app_rate_limit_hit('admin_password_change', 3, 600, 900);
+                    $message = 'Current password is incorrect.';
+                    $messageType = 'error';
+                } elseif ($passwordErrors !== []) {
+                    $message = $passwordErrors[0];
+                    $messageType = 'error';
+                } elseif ($newPassword !== $confirmPassword) {
+                    $message = 'New password and confirmation do not match.';
+                    $messageType = 'error';
+                } else {
+                    $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+                    $updatePasswordStatement = $mysqli->prepare('UPDATE users SET password = ? WHERE id = ?');
+                    $updatePasswordStatement->bind_param('si', $passwordHash, $admin['id']);
+                    $updatePasswordStatement->execute();
+                    $updatePasswordStatement->close();
+
+                    app_rate_limit_clear('admin_password_change');
+                    header('Location: admin-settings.php?updated=password');
+                    exit();
+                }
             }
         }
     }

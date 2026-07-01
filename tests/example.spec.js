@@ -32,6 +32,19 @@ async function signupTestUser(page) {
   return { email, password };
 }
 
+async function logoutCurrentUser(page) {
+  await page.goto(new URL('profile.php', baseURL).toString(), {
+    waitUntil: 'domcontentloaded',
+  });
+  const token = await csrfValue(page, 'form[action="logout.php"] input[name="csrf_token"]');
+  const response = await page.request.post(new URL('logout.php', baseURL).toString(), {
+    form: {
+      csrf_token: token,
+    },
+  });
+  expect(response.ok()).toBe(true);
+}
+
 async function loginWithCredentials(page, email, password) {
   await page.goto(new URL('login.php', baseURL).toString(), {
     waitUntil: 'domcontentloaded',
@@ -164,6 +177,178 @@ test.describe('CSRF protection', () => {
 
     expect(response.status()).toBe(403);
     expect(await response.text()).toMatch(/Security check failed/i);
+  });
+});
+
+test.describe('Session rate limiting', () => {
+  test('login throttles repeated failed attempts', async ({ page }) => {
+    const { email } = await signupTestUser(page);
+    await logoutCurrentUser(page);
+
+    await page.goto(new URL('login.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+    const token = await csrfValue(page);
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const response = await page.request.post(new URL('login.php', baseURL).toString(), {
+        form: {
+          csrf_token: token,
+          email,
+          password: `WrongPass${attempt}!`,
+        },
+      });
+      expect(response.status()).toBe(200);
+      expect(await response.text()).toMatch(/Invalid email or password/i);
+    }
+
+    const throttledResponse = await page.request.post(new URL('login.php', baseURL).toString(), {
+      form: {
+        csrf_token: token,
+        email,
+        password: 'WrongPassFinal!',
+      },
+    });
+
+    expect(throttledResponse.status()).toBe(200);
+    expect(await throttledResponse.text()).toMatch(/Too many login attempts/i);
+  });
+
+  test('successful login clears earlier failed login attempts', async ({ page }) => {
+    const { email, password } = await signupTestUser(page);
+    await logoutCurrentUser(page);
+
+    await page.goto(new URL('login.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+    const token = await csrfValue(page);
+
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const response = await page.request.post(new URL('login.php', baseURL).toString(), {
+        form: {
+          csrf_token: token,
+          email,
+          password: `WrongBeforeReset${attempt}!`,
+        },
+      });
+      expect(response.status()).toBe(200);
+      expect(await response.text()).toMatch(/Invalid email or password/i);
+    }
+
+    await loginWithCredentials(page, email, password);
+    await logoutCurrentUser(page);
+
+    await page.goto(new URL('login.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+    const freshToken = await csrfValue(page);
+    const response = await page.request.post(new URL('login.php', baseURL).toString(), {
+      form: {
+        csrf_token: freshToken,
+        email,
+        password: 'WrongAfterReset!',
+      },
+    });
+    const body = await response.text();
+
+    expect(response.status()).toBe(200);
+    expect(body).toMatch(/Invalid email or password/i);
+    expect(body).not.toMatch(/Too many login attempts/i);
+  });
+
+  test('CSRF rejection does not increment login throttling', async ({ page }) => {
+    await page.goto(new URL('login.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const csrfResponse = await page.request.post(new URL('login.php', baseURL).toString(), {
+        form: {
+          email: 'csrf-rate-limit@example.com',
+          password: `WrongCsrf${attempt}!`,
+        },
+      });
+      expect(csrfResponse.status()).toBe(403);
+    }
+
+    const token = await csrfValue(page);
+    const response = await page.request.post(new URL('login.php', baseURL).toString(), {
+      form: {
+        csrf_token: token,
+        email: 'csrf-rate-limit@example.com',
+        password: 'WrongWithValidCsrf!',
+      },
+    });
+    const body = await response.text();
+
+    expect(response.status()).toBe(200);
+    expect(body).toMatch(/Invalid email or password/i);
+    expect(body).not.toMatch(/Too many login attempts/i);
+  });
+
+  test('contact form throttles repeated valid submissions', async ({ page }) => {
+    await page.goto(new URL('contact.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+    const token = await csrfValue(page);
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const response = await page.request.post(new URL('contact.php', baseURL).toString(), {
+        form: {
+          csrf_token: token,
+          name: 'Rate Limit Tester',
+          email: uniqueEmail(`contact-rate-${attempt}`),
+          topic: 'support',
+          message: `Valid contact message ${attempt}`,
+        },
+      });
+      expect(response.ok()).toBe(true);
+    }
+
+    const throttledResponse = await page.request.post(new URL('contact.php', baseURL).toString(), {
+      form: {
+        csrf_token: token,
+        name: 'Rate Limit Tester',
+        email: uniqueEmail('contact-rate-final'),
+        topic: 'support',
+        message: 'This contact message should be throttled.',
+      },
+    });
+
+    expect(throttledResponse.status()).toBe(200);
+    expect(await throttledResponse.text()).toMatch(/Too many contact submissions/i);
+  });
+
+  test('forgot password form throttles repeated valid demo submissions', async ({ page }) => {
+    await page.goto(new URL('forgot-password.php', baseURL).toString(), {
+      waitUntil: 'domcontentloaded',
+    });
+    const token = await csrfValue(page);
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const response = await page.request.post(new URL('forgot-password.php', baseURL).toString(), {
+        form: {
+          csrf_token: token,
+          account_email: uniqueEmail(`forgot-rate-${attempt}`),
+          recovery_email: uniqueEmail(`recovery-rate-${attempt}`),
+          recovery_phone: '',
+        },
+      });
+      expect(response.status()).toBe(200);
+      expect(await response.text()).toMatch(/Demo Mode/i);
+    }
+
+    const throttledResponse = await page.request.post(new URL('forgot-password.php', baseURL).toString(), {
+      form: {
+        csrf_token: token,
+        account_email: uniqueEmail('forgot-rate-final'),
+        recovery_email: uniqueEmail('recovery-rate-final'),
+        recovery_phone: '',
+      },
+    });
+
+    expect(throttledResponse.status()).toBe(200);
+    expect(await throttledResponse.text()).toMatch(/Too many recovery attempts/i);
   });
 });
 

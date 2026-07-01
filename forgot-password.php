@@ -15,7 +15,12 @@ function forgot_password_valid_phone(string $phone): bool
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     app_require_csrf();
 
-    if ($accountEmail === '') {
+    $recoveryRateLimit = app_rate_limit_check('forgot_password', 3, 900, 900);
+
+    if (!$recoveryRateLimit['allowed']) {
+        $message = app_rate_limit_message($recoveryRateLimit, 'recovery attempts');
+        $messageType = 'error';
+    } elseif ($accountEmail === '') {
         $message = 'Please enter your account email.';
         $messageType = 'error';
     } elseif (!filter_var($accountEmail, FILTER_VALIDATE_EMAIL)) {
@@ -31,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = 'Please enter a valid recovery phone number.';
         $messageType = 'error';
     } else {
+        app_rate_limit_hit('forgot_password', 3, 900, 900);
         $message = 'Demo Mode: If the information matches our records, a password recovery message would normally be sent to your recovery contact.';
         $messageType = 'success';
     }
