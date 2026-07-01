@@ -21,6 +21,15 @@ function admin_reset_users_auto_increment(mysqli $mysqli): void
     $mysqli->query('ALTER TABLE users AUTO_INCREMENT = ' . $nextId);
 }
 
+function admin_locked_admin_count(mysqli $mysqli): int
+{
+    $adminResult = $mysqli->query('SELECT id FROM users WHERE role = 1 FOR UPDATE');
+    $adminCount = $adminResult->num_rows;
+    $adminResult->free();
+
+    return $adminCount;
+}
+
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 try {
@@ -39,17 +48,61 @@ try {
             $newRole = filter_input(INPUT_POST, 'role', FILTER_VALIDATE_INT);
 
             if ($newRole !== false && $newRole !== null && array_key_exists($newRole, $roleLabels)) {
-                $statement = $mysqli->prepare('UPDATE users SET role = ? WHERE id = ?');
-                $statement->bind_param('ii', $newRole, $userId);
-                $statement->execute();
-                $statement->close();
+                $currentAdminId = (int) ($_SESSION['user_id'] ?? 0);
+                $transactionStarted = false;
 
-                header('Location: admin-users-list.php?updated=1');
-                exit();
+                try {
+                    $mysqli->begin_transaction();
+                    $transactionStarted = true;
+
+                    $userStatement = $mysqli->prepare('SELECT id, username, role FROM users WHERE id = ? LIMIT 1 FOR UPDATE');
+                    $userStatement->bind_param('i', $userId);
+                    $userStatement->execute();
+                    $userResult = $userStatement->get_result();
+                    $targetUser = $userResult->fetch_assoc();
+                    $userResult->free();
+                    $userStatement->close();
+
+                    if ($targetUser === null) {
+                        throw new RuntimeException('User account not found.');
+                    }
+
+                    $targetRole = (int) $targetUser['role'];
+
+                    if ($userId === $currentAdminId && $newRole !== 1) {
+                        throw new RuntimeException('You cannot demote the account you are currently using.');
+                    }
+
+                    if ($targetRole === 1 && $newRole !== 1 && admin_locked_admin_count($mysqli) <= 1) {
+                        throw new RuntimeException('You cannot demote the last admin account.');
+                    }
+
+                    if ($targetRole !== $newRole) {
+                        $statement = $mysqli->prepare('UPDATE users SET role = ? WHERE id = ?');
+                        $statement->bind_param('ii', $newRole, $userId);
+                        $statement->execute();
+                        $statement->close();
+                    }
+
+                    $mysqli->commit();
+                    $transactionStarted = false;
+
+                    header('Location: admin-users-list.php?updated=1');
+                    exit();
+                } catch (Throwable $exception) {
+                    if ($transactionStarted) {
+                        $mysqli->rollback();
+                    }
+
+                    $message = $exception instanceof RuntimeException
+                        ? $exception->getMessage()
+                        : 'Unable to update this user role right now.';
+                    $messageType = 'error';
+                }
+            } else {
+                $message = 'Please choose a valid role before updating.';
+                $messageType = 'error';
             }
-
-            $message = 'Please choose a valid role before updating.';
-            $messageType = 'error';
         } elseif ($action === 'delete_user') {
             $currentAdminId = (int) ($_SESSION['user_id'] ?? 0);
 
@@ -75,9 +128,7 @@ try {
                     }
 
                     if ((int) $targetUser['role'] === 1) {
-                        $adminCountResult = $mysqli->query('SELECT COUNT(*) FROM users WHERE role = 1');
-                        $adminCount = (int) ($adminCountResult->fetch_row()[0] ?? 0);
-                        $adminCountResult->free();
+                        $adminCount = admin_locked_admin_count($mysqli);
 
                         if ($adminCount <= 1) {
                             throw new RuntimeException('You cannot delete the last admin account.');

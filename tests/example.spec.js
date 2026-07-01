@@ -55,6 +55,41 @@ async function loginWithCredentials(page, email, password) {
   await expect(page).not.toHaveURL(/login\.php/);
 }
 
+async function loginConfiguredAdmin(page) {
+  const adminEmail = process.env.ADMIN_EMAIL || '';
+  const adminPassword = process.env.ADMIN_PASSWORD || '';
+  test.skip(adminEmail === '' || adminPassword === '', 'Set ADMIN_EMAIL and ADMIN_PASSWORD to exercise admin-only flows.');
+
+  await loginWithCredentials(page, adminEmail, adminPassword);
+
+  return { adminEmail, adminPassword };
+}
+
+async function gotoAdminUsers(page) {
+  await page.goto(new URL('admin pages/admin-users-list.php', baseURL).toString(), {
+    waitUntil: 'domcontentloaded',
+  });
+  await expect(page).toHaveURL(/admin-users-list\.php/);
+}
+
+async function adminUserIdForEmail(page, email) {
+  const row = page.locator('tbody tr', { hasText: email }).first();
+  await expect(row).toBeVisible();
+
+  return Number((await row.locator('td').first().innerText()).trim());
+}
+
+async function postAdminUserAction(page, form) {
+  const token = await csrfValue(page, 'form[action="admin-users-list.php"] input[name="csrf_token"]');
+
+  return page.request.post(new URL('admin pages/admin-users-list.php', baseURL).toString(), {
+    form: {
+      csrf_token: token,
+      ...form,
+    },
+  });
+}
+
 function expectSecurityHeaders(response) {
   const headers = response.headers();
 
@@ -391,6 +426,78 @@ test.describe('Admin authorization refresh', () => {
 
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveURL(/admin-home\.php/);
+  });
+});
+
+test.describe('Admin user-management safeguards', () => {
+  test('admin can promote, demote, and delete a disposable user', async ({ page }) => {
+    const { email } = await signupTestUser(page);
+    await logoutCurrentUser(page);
+    await loginConfiguredAdmin(page);
+    await gotoAdminUsers(page);
+
+    const userId = await adminUserIdForEmail(page, email);
+
+    const promoteResponse = await postAdminUserAction(page, {
+      action: 'update_role',
+      user_id: String(userId),
+      role: '1',
+    });
+    expect(promoteResponse.status()).toBe(200);
+    expect(await promoteResponse.text()).toMatch(/User role updated successfully/i);
+
+    await gotoAdminUsers(page);
+    const demoteResponse = await postAdminUserAction(page, {
+      action: 'update_role',
+      user_id: String(userId),
+      role: '0',
+    });
+    expect(demoteResponse.status()).toBe(200);
+    expect(await demoteResponse.text()).toMatch(/User role updated successfully/i);
+
+    await gotoAdminUsers(page);
+    const deleteResponse = await postAdminUserAction(page, {
+      action: 'delete_user',
+      user_id: String(userId),
+    });
+    expect(deleteResponse.status()).toBe(200);
+    expect(await deleteResponse.text()).toMatch(/User account deleted successfully/i);
+  });
+
+  test('admin cannot demote or delete their own account', async ({ page }) => {
+    const { adminEmail } = await loginConfiguredAdmin(page);
+    await gotoAdminUsers(page);
+
+    const adminUserId = await adminUserIdForEmail(page, adminEmail);
+    const selfDemoteResponse = await postAdminUserAction(page, {
+      action: 'update_role',
+      user_id: String(adminUserId),
+      role: '0',
+    });
+    expect(selfDemoteResponse.status()).toBe(200);
+    expect(await selfDemoteResponse.text()).toMatch(/cannot demote the account you are currently using/i);
+
+    await gotoAdminUsers(page);
+    const selfDeleteResponse = await postAdminUserAction(page, {
+      action: 'delete_user',
+      user_id: String(adminUserId),
+    });
+    expect(selfDeleteResponse.status()).toBe(200);
+    expect(await selfDeleteResponse.text()).toMatch(/cannot delete the account you are currently using/i);
+  });
+
+  test('admin user actions handle missing users safely', async ({ page }) => {
+    await loginConfiguredAdmin(page);
+    await gotoAdminUsers(page);
+
+    const missingUserResponse = await postAdminUserAction(page, {
+      action: 'update_role',
+      user_id: '2147483647',
+      role: '0',
+    });
+
+    expect(missingUserResponse.status()).toBe(200);
+    expect(await missingUserResponse.text()).toMatch(/User account not found/i);
   });
 });
 
